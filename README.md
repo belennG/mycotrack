@@ -45,3 +45,20 @@ The repository is divided into two main services:
 5. **Verification:**
     Open http://127.0.0.1:8000/health in your browser to verify the backend is running.
 
+### Database Setup (PostgreSQL & Docker)
+
+1. **Start the database container:**
+   From the root of the project, run:
+   ```bash
+   docker-compose up -d
+
+2. **Environment Variables:**
+    ```bash
+    cp backend/.env.example backend/.env
+
+3. **Verify connection:**
+    ```bash
+    cd backend
+    python database.py
+
+
