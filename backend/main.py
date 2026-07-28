@@ -1,4 +1,6 @@
 from fastapi import FastAPI
+from middleware.cors import setup_cors
+from routers import daily_logs
 
 # Application factory pattern / initialization
 app = FastAPI(
@@ -6,6 +8,12 @@ app = FastAPI(
     description="Backend for the MycoTrack ClimateTech Dashboard",
     version="1.0.0"
 )
+
+# 1. Apply CORS middleware
+setup_cors(app)
+
+# 2. Include the daily logs router
+app.include_router(daily_logs.router)
 
 # Health check endpoint
 @app.get("/health")
