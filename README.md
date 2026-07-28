@@ -17,3 +17,48 @@ The repository is divided into two main services:
 - Python 3.9+
 - Node.js 18+
 - Docker & Docker Compose
+
+### Backend Setup & Running Locally
+
+1. **Navigate to the backend folder:**
+   ```bash
+   cd backend
+2. **Create and activate the virtual environment:**
+•	Mac/Linux:  
+
+    ```bash
+    python -m venv venv 
+    source venv/bin/activate
+
+•	Windows:
+
+    ```bash
+    python -m venv venv 
+    venv\Scripts\activate
+
+3. **Install dependencies:**
+    ```bash
+    pip install -r requirements.txt
+4.  **Run the development server:**
+    ```bash
+    uvicorn main:app --reload
+5. **Verification:**
+    Open http://127.0.0.1:8000/health in your browser to verify the backend is running.
+
+### Database Setup (PostgreSQL & Docker)
+
+1. **Start the database container:**
+   From the root of the project, run:
+   ```bash
+   docker-compose up -d
+
+2. **Environment Variables:**
+    ```bash
+    cp backend/.env.example backend/.env
+
+3. **Verify connection:**
+    ```bash
+    cd backend
+    python database.py
+
+
