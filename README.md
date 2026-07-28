@@ -61,4 +61,15 @@ The repository is divided into two main services:
     cd backend
     python database.py
 
+### Database Migrations (Alembic)
+
+To create a new migration after modifying SQLAlchemy models:
+
+1. Ensure PostgreSQL Docker container is running.
+2. Run the migration generator:
+   ```bash
+   alembic revision --autogenerate -m "describe your changes here"
+3. Apply the migration to the database:
+    ```bash
+    alembic upgrade head
 
