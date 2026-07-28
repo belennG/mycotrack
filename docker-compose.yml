@@ -1,0 +1,18 @@
+services:
+  db:
+    image: postgres:15
+    container_name: mycotrack_db
+    restart: unless-stopped
+    env_file:
+      - ./backend/.env 
+    environment:
+      POSTGRES_USER: ${DB_USER:-postgres}
+      POSTGRES_PASSWORD: ${DB_PASSWORD:-postgres}
+      POSTGRES_DB: ${DB_NAME:-mycotrack}
+    ports:
+      - "5432:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+
+volumes:
+  postgres_data:
