@@ -2,6 +2,7 @@ import enum
 from datetime import datetime, timezone
 from sqlalchemy import Column, String, DateTime, Text, Enum as SQLEnum
 from models.base import BaseModel
+from sqlalchemy.orm import relationship
 
 class BatchStatus(str, enum.Enum):
     """Enumeration of possible crop batch statuses."""
@@ -32,6 +33,8 @@ class Batch(BaseModel):
     
     created_at = Column(DateTime, default=lambda: datetime.now(timezone.utc), nullable=False)
     updated_at = Column(DateTime, default=lambda: datetime.now(timezone.utc), nullable=False)
+
+    daily_logs = relationship("DailyLog", back_populates="batch", cascade="all, delete-orphan")
 
 """
 =============================================================================
