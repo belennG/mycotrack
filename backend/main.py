@@ -1,6 +1,6 @@
 from fastapi import FastAPI
 from middleware.cors import setup_cors
-from routers import daily_logs
+from routers import daily_logs, analytics
 
 # Application factory pattern / initialization
 app = FastAPI(
@@ -14,6 +14,7 @@ setup_cors(app)
 
 # 2. Include the daily logs router
 app.include_router(daily_logs.router)
+app.include_router(analytics.router)  
 
 # Health check endpoint
 @app.get("/health")
