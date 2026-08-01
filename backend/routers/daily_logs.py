@@ -1,10 +1,9 @@
 from fastapi import APIRouter, Depends, HTTPException, status
 from sqlalchemy.orm import Session
-from datetime import datetime
+from datetime import date
 from typing import Optional
-
+from uuid import UUID
 from database import get_db
-# Import the Daily Log models and schemas (assuming they follow the same pattern as Batch)
 from models.daily_log import DailyLog
 from models.batch import Batch
 from schemas.daily_log import (
@@ -23,7 +22,9 @@ router = APIRouter(
 def list_daily_logs(
     skip: int = 0, 
     limit: int = 10, 
-    batch_id: Optional[str] = None,
+    batch_id: Optional[UUID] = None,
+    date_from: Optional[date] = None, 
+    date_to: Optional[date] = None,
     db: Session = Depends(get_db)
 ):
     """List all daily logs with pagination and optional batch filtering."""
@@ -32,6 +33,11 @@ def list_daily_logs(
     # Filter by batch_id if the user provided one in the URL
     if batch_id:
         query = query.filter(DailyLog.batch_id == batch_id)
+    # Filter by date range
+    if date_from:
+        query = query.filter(DailyLog.log_date >= date_from)
+    if date_to:
+        query = query.filter(DailyLog.log_date <= date_to)
         
     total = query.count()
     logs = query.offset(skip).limit(limit).all()
@@ -39,7 +45,7 @@ def list_daily_logs(
     return {"total": total, "items": logs}
 
 @router.get("/{log_id}", response_model=DailyLogResponse, status_code=status.HTTP_200_OK)
-def get_daily_log(log_id: str, db: Session = Depends(get_db)):
+def get_daily_log(log_id: UUID, db: Session = Depends(get_db)):
     """Retrieve a single daily log by its ID."""
     log = db.query(DailyLog).filter(DailyLog.id == log_id).first()
     if not log:
@@ -62,7 +68,7 @@ def create_daily_log(log_data: DailyLogCreate, db: Session = Depends(get_db)):
     return new_log
 
 @router.put("/{log_id}", response_model=DailyLogResponse, status_code=status.HTTP_200_OK)
-def update_daily_log(log_id: str, log_data: DailyLogUpdate, db: Session = Depends(get_db)):
+def update_daily_log(log_id: UUID, log_data: DailyLogUpdate, db: Session = Depends(get_db)):
     """Update a daily log entry."""
     log = db.query(DailyLog).filter(DailyLog.id == log_id).first()
     if not log:
@@ -78,7 +84,7 @@ def update_daily_log(log_id: str, log_data: DailyLogUpdate, db: Session = Depend
     return log
 
 @router.delete("/{log_id}", status_code=status.HTTP_204_NO_CONTENT)
-def delete_daily_log(log_id: str, db: Session = Depends(get_db)):
+def delete_daily_log(log_id: UUID, db: Session = Depends(get_db)):
     """Delete a daily log entry."""
     log = db.query(DailyLog).filter(DailyLog.id == log_id).first()
     if not log:

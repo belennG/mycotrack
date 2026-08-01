@@ -34,3 +34,22 @@ class DailyLogListResponse(BaseModel):
     """Schema for paginated list responses."""
     total: int
     items: List[DailyLogResponse]
+"""
+=============================================================================
+MODEL USAGE EXAMPLE:
+=============================================================================
+from datetime import date
+from models.daily_log import DailyLog
+
+# Creating a new DailyLog instance in code:
+new_log = DailyLog(
+    batch_id="550e8400-e29b-41d4-a716-446655440000", # Must be a valid UUID from an existing Batch
+    log_date=date(2026, 8, 1),
+    temperature=24.5,
+    humidity=85.0,
+    ph_level=6.5,
+    moisture=90.0,
+    notes="Mycelium knotting observed. Increased humidity to trigger pinning."
+)
+=============================================================================
+"""
