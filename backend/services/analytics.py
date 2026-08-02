@@ -1,5 +1,6 @@
-from typing import List, Dict, Any, Optional
+from typing import List, Dict, Any
 from models.daily_log import DailyLog
+
 
 def calculate_averages(logs: List[DailyLog]) -> Dict[str, float]:
     """
@@ -8,19 +9,29 @@ def calculate_averages(logs: List[DailyLog]) -> Dict[str, float]:
     if not logs:
         return {"temperature": 0.0, "humidity": 0.0, "ph_level": 0.0, "moisture": 0.0}
 
-    metrics = {"temperature": [], "humidity": [], "ph_level": [], "moisture": []}
-    
+    metrics: dict = {
+        "temperature": [],
+        "humidity": [],
+        "ph_level": [],
+        "moisture": [],
+    }
+
     for log in logs:
-        if log.temperature is not None: metrics["temperature"].append(log.temperature)
-        if log.humidity is not None: metrics["humidity"].append(log.humidity)
-        if log.ph_level is not None: metrics["ph_level"].append(log.ph_level)
-        if log.moisture is not None: metrics["moisture"].append(log.moisture)
+        if log.temperature is not None:
+            metrics["temperature"].append(log.temperature)
+        if log.humidity is not None:
+            metrics["humidity"].append(log.humidity)
+        if log.ph_level is not None:
+            metrics["ph_level"].append(log.ph_level)
+        if log.moisture is not None:
+            metrics["moisture"].append(log.moisture)
 
     averages = {}
     for key, values in metrics.items():
         averages[key] = round(sum(values) / len(values), 2) if values else 0.0
-        
+
     return averages
+
 
 def analyze_trends(logs: List[DailyLog]) -> Dict[str, str]:
     """
@@ -28,12 +39,17 @@ def analyze_trends(logs: List[DailyLog]) -> Dict[str, str]:
     to determine whether the trend is increasing, decreasing or stable.
     """
     if len(logs) < 2:
-        return {"temperature": "stable", "humidity": "stable", "ph_level": "stable", "moisture": "stable"}
+        return {
+            "temperature": "stable",
+            "humidity": "stable",
+            "ph_level": "stable",
+            "moisture": "stable",
+        }
 
     # Sort the logs by date in ascending order
-    sorted_logs = sorted(logs, key=lambda x: x.log_date)
+    sorted_logs = sorted(logs, key=lambda x: x.log_date)  # type: ignore
     midpoint = len(sorted_logs) // 2
-    
+
     first_half = sorted_logs[:midpoint]
     second_half = sorted_logs[midpoint:]
 
@@ -49,8 +65,9 @@ def analyze_trends(logs: List[DailyLog]) -> Dict[str, str]:
             trends[key] = "decreasing"
         else:
             trends[key] = "stable"
-            
+
     return trends
+
 
 def calculate_completeness(logs: List[DailyLog]) -> float:
     """
@@ -65,38 +82,49 @@ def calculate_completeness(logs: List[DailyLog]) -> float:
     actual_filled = 0
 
     for log in logs:
-        actual_filled += sum(1 for field in [log.temperature, log.humidity, log.ph_level, log.moisture] if field is not None)
+        actual_filled += sum(
+            1
+            for field in [log.temperature, log.humidity, log.ph_level, log.moisture]
+            if field is not None
+        )
 
     return round((actual_filled / total_expected) * 100, 2)
 
-def detect_anomalies(logs: List[DailyLog], thresholds: Dict[str, Dict[str, float]]) -> List[Dict[str, Any]]:
+
+def detect_anomalies(
+    logs: List[DailyLog], thresholds: Dict[str, Dict[str, float]]
+) -> List[Dict[str, Any]]:
     """
     Detects whether any recent values fall outside the safe ranges (thresholds).
     Example of thresholds: {'temperature': {'min': 20.0, 'max': 25.0}}
     """
-    anomalies = []
+    anomalies: list[dict] = []
     if not logs:
         return anomalies
-        
+
     # We only check the most recent log to detect current anomalies
-    latest_log = sorted(logs, key=lambda x: x.log_date, reverse=True)[0]
+    latest_log = sorted(logs, key=lambda x: x.log_date, reverse=True)[0]  # type: ignore
 
     for metric, limits in thresholds.items():
         value = getattr(latest_log, metric, None)
         if value is not None:
-            if value < limits.get('min', -float('inf')):
-                anomalies.append({
-                    "metric": metric,
-                    "issue": "too_low",
-                    "value": value,
-                    "threshold": limits['min']
-                })
-            elif value > limits.get('max', float('inf')):
-                anomalies.append({
-                    "metric": metric,
-                    "issue": "too_high",
-                    "value": value,
-                    "threshold": limits['max']
-                })
-                
+            if value < limits.get("min", -float("inf")):
+                anomalies.append(
+                    {
+                        "metric": metric,
+                        "issue": "too_low",
+                        "value": value,
+                        "threshold": limits["min"],
+                    }
+                )
+            elif value > limits.get("max", float("inf")):
+                anomalies.append(
+                    {
+                        "metric": metric,
+                        "issue": "too_high",
+                        "value": value,
+                        "threshold": limits["max"],
+                    }
+                )
+
     return anomalies

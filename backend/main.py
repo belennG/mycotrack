@@ -6,7 +6,7 @@ from routers import daily_logs, analytics, alerts
 app = FastAPI(
     title="MycoTrack API",
     description="Backend for the MycoTrack ClimateTech Dashboard",
-    version="1.0.0"
+    version="1.0.0",
 )
 
 # 1. Apply CORS middleware
@@ -16,6 +16,7 @@ setup_cors(app)
 app.include_router(daily_logs.router)
 app.include_router(analytics.router)
 app.include_router(alerts.router)
+
 
 # Health check endpoint
 @app.get("/health")
