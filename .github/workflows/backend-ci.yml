@@ -30,7 +30,7 @@ jobs:
     # Test across multiple Python versions
     strategy:
       matrix:
-        python-version: ["3.10", "3.11"]
+        python-version: ["3.13"]
 
     steps:
     # Download code into the cloud server
