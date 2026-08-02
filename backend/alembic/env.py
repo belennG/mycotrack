@@ -8,6 +8,7 @@ from alembic import context
 from database import Base
 from models.batch import Batch
 from models.daily_log import DailyLog  
+from models.alert import Alert
 
 # this is the Alembic Config object, which provides
 # access to the values within the .ini file in use.
