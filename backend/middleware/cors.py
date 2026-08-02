@@ -1,6 +1,7 @@
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 
+
 def setup_cors(app: FastAPI) -> None:
     """
     Configures Cross-Origin Resource Sharing (CORS) for the FastAPI application.

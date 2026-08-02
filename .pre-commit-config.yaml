@@ -1,0 +1,22 @@
+repos:
+  # Black - Code Formatter
+  - repo: https://github.com/psf/black
+    rev: 24.2.0  # Use a recent version of Black
+    hooks:
+      - id: black
+        language_version: python3.13
+
+  # Flake8 - Linter
+  - repo: https://github.com/PyCQA/flake8
+    rev: 7.0.0
+    hooks:
+      - id: flake8
+        args: ["--max-line-length=100"]
+
+  # 3. Trailing Whitespace & File Fixers
+  - repo: https://github.com/pre-commit/pre-commit-hooks
+    rev: v4.5.0
+    hooks:
+      - id: trailing-whitespace
+      - id: end-of-file-fixer
+      - id: check-yaml

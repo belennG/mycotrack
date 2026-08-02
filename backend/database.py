@@ -13,7 +13,9 @@ DB_HOST = os.getenv("DB_HOST")
 DB_PORT = os.getenv("DB_PORT")
 DB_NAME = os.getenv("DB_NAME")
 
-SQLALCHEMY_DATABASE_URL = f"postgresql://{DB_USER}:{DB_PASSWORD}@{DB_HOST}:{DB_PORT}/{DB_NAME}"
+SQLALCHEMY_DATABASE_URL = (
+    f"postgresql://{DB_USER}:{DB_PASSWORD}@{DB_HOST}:{DB_PORT}/{DB_NAME}"
+)
 
 # Core interface to the db
 engine = create_engine(SQLALCHEMY_DATABASE_URL)
@@ -24,6 +26,7 @@ SessionLocal = sessionmaker(autocommit=False, autoflush=False, bind=engine)
 # Parent class for all future db models
 Base = declarative_base()
 
+
 # Dependency to get a db session for each request
 def get_db():
     db = SessionLocal()
@@ -31,6 +34,7 @@ def get_db():
         yield db
     finally:
         db.close()
+
 
 if __name__ == "__main__":
     try:

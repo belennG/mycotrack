@@ -10,7 +10,7 @@ jobs:
   test-and-lint:
     name: Run Tests and Code Quality Checks
     runs-on: ubuntu-latest
-    
+
     # Set up a temp PostgreSQL database in the cloud just for testing
     services:
       postgres:

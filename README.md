@@ -24,16 +24,16 @@ The repository is divided into two main services:
    ```bash
    cd backend
 2. **Create and activate the virtual environment:**
-•	Mac/Linux:  
+•	Mac/Linux:
 
     ```bash
-    python -m venv venv 
+    python -m venv venv
     source venv/bin/activate
 
 •	Windows:
 
     ```bash
-    python -m venv venv 
+    python -m venv venv
     venv\Scripts\activate
 
 3. **Install dependencies:**
@@ -72,4 +72,3 @@ To create a new migration after modifying SQLAlchemy models:
 3. Apply the migration to the database:
     ```bash
     alembic upgrade head
-
