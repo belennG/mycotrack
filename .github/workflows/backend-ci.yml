@@ -62,10 +62,17 @@ jobs:
 
     # Security Scanning
     - name: Security Scan (Bandit)
-      run: bandit -r backend -c "bandit.yml" || true # || true prevents failure if we don't have a config yet
+      run: bandit -r backend || true # || true prevents failure if we don't have a config yet
 
     - name: Dependency Vulnerability Check (Safety)
       run: safety check -r backend/requirements.txt || true # || true to warn instead of failing immediately
+
+    - name: Run Database Migrations
+      env:
+        DATABASE_URL: postgresql://test_user:test_password@localhost:5432/test_db
+      run: |
+        cd backend
+        alembic upgrade head
 
     # Testing
     - name: Run Pytest

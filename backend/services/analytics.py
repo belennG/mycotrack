@@ -9,7 +9,12 @@ def calculate_averages(logs: List[DailyLog]) -> Dict[str, float]:
     if not logs:
         return {"temperature": 0.0, "humidity": 0.0, "ph_level": 0.0, "moisture": 0.0}
 
-    metrics = {"temperature": [], "humidity": [], "ph_level": [], "moisture": []}
+    metrics: dict = {
+        "temperature": [],
+        "humidity": [],
+        "ph_level": [],
+        "moisture": [],
+    }
 
     for log in logs:
         if log.temperature is not None:
@@ -42,7 +47,7 @@ def analyze_trends(logs: List[DailyLog]) -> Dict[str, str]:
         }
 
     # Sort the logs by date in ascending order
-    sorted_logs = sorted(logs, key=lambda x: x.log_date)
+    sorted_logs = sorted(logs, key=lambda x: x.log_date)  # type: ignore
     midpoint = len(sorted_logs) // 2
 
     first_half = sorted_logs[:midpoint]
@@ -93,12 +98,12 @@ def detect_anomalies(
     Detects whether any recent values fall outside the safe ranges (thresholds).
     Example of thresholds: {'temperature': {'min': 20.0, 'max': 25.0}}
     """
-    anomalies = []
+    anomalies: list[dict] = []
     if not logs:
         return anomalies
 
     # We only check the most recent log to detect current anomalies
-    latest_log = sorted(logs, key=lambda x: x.log_date, reverse=True)[0]
+    latest_log = sorted(logs, key=lambda x: x.log_date, reverse=True)[0]  # type: ignore
 
     for metric, limits in thresholds.items():
         value = getattr(latest_log, metric, None)

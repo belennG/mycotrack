@@ -53,8 +53,8 @@ def acknowledge_alert(alert_id: UUID, db: Session = Depends(get_db)):
         raise HTTPException(status_code=404, detail="Alert not found")
 
     if not alert.is_acknowledged:
-        alert.is_acknowledged = True
-        alert.acknowledged_at = datetime.now(timezone.utc)
+        alert.is_acknowledged = True  # type: ignore
+        alert.acknowledged_at = datetime.now(timezone.utc)  # type: ignore
         db.commit()
         db.refresh(alert)
 

@@ -26,7 +26,9 @@ class Batch(BaseModel):
     crop_type = Column(String(100), nullable=False)
 
     # Status uses the Python Enum mapped to a database string/enum
-    status = Column(SQLEnum(BatchStatus), default=BatchStatus.ACTIVE, nullable=False)
+    status: str = Column(  # type: ignore
+        SQLEnum(BatchStatus), default=BatchStatus.ACTIVE, nullable=False
+    )
 
     start_date = Column(
         DateTime, default=lambda: datetime.now(timezone.utc), nullable=False

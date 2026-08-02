@@ -12,7 +12,7 @@ DEFAULT_THRESHOLDS = {
 
 
 def generate_alerts(
-    log: DailyLog, thresholds: Dict[str, Dict[str, float]] = None
+    log: DailyLog, thresholds: Dict[str, Dict[str, float]] | None = None
 ) -> List[Dict[str, Any]]:
     """
     Evaluates a single daily log against environmental thresholds.

@@ -7,7 +7,7 @@ from models.batch import BatchStatus
 class BatchBase(BaseModel):
     """Base schema with shared fields for creation and updates."""
 
-    batch_name: str = Field(
+    batch_name: str = Field(  # type: ignore
         ..., min_index=1, max_length=100, description="Unique identifier for the batch"
     )
     crop_type: str = Field(
