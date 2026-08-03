@@ -4,7 +4,7 @@ React + TypeScript + Vite frontend for the MycoTrack mushroom cultivation manage
 
 ## Prerequisites
 
-- Node.js (v18+)
+- **Node.js version:** `>=22.12.0` (or `20.19.0+`)
 - npm
 
 ## Getting Started
@@ -37,3 +37,29 @@ Executes the test suite using Vitest.
 ```bash
 npm run test
 ```
+### 6. Before committing
+
+## Running Checks Locally
+Before submitting code or pushing changes, you can run all pipeline checks locally using npm scripts:
+
+1. **Linting (Oxlint):**
+   ```bash
+   npm run lint
+
+2. **Testing (Vitest):**
+  ```bash
+    npm run test
+3. **Production Build Verification:**
+  ```bash
+    npm run build
+
+## Git Hooks & Husky
+This repository uses Husky to automate local validation. When you attempt a git commit, the pre-commit hook will automatically execute:
+  ```bash
+    npm run lint
+    npm run test
+
+If any checks fail, the commit will be blocked until the issues are resolved.
+
+## CI/CD Pipeline
+The GitHub Actions workflow (.github/workflows/frontend-ci.yml) automatically executes on pushes and pull requests targeting changes inside the frontend/ folder. It validates linting, security vulnerabilities (npm audit), test execution, and final build integrity.
