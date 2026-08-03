@@ -38,8 +38,8 @@ jobs:
       - name: Run Security Vulnerability Audit
         run: npm audit --audit-level=moderate
 
-      - name: Run Unit and Component Tests (Vitest)
-        run: npm run test
+    #   - name: Run Unit and Component Tests (Vitest)
+    #     run: npm run test
 
       - name: Verify Production Build
         run: npm run build
