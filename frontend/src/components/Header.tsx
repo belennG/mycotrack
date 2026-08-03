@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react'
-import { Flex, Box, Button, Heading, HStack } from '@chakra-ui/react'
+import { Flex, Button, Heading, HStack } from '@chakra-ui/react'
 import { NavLink } from 'react-router-dom'
 
 export default function Header() {
