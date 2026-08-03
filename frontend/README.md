@@ -2,6 +2,15 @@
 
 React + TypeScript + Vite frontend for the MycoTrack mushroom cultivation management app.
 
+## Core Libraries & Tech Stack
+
+- **UI Framework:** [Chakra UI](https://chakra-ui.com/) (styled components & accessibility primitives)
+- **Routing:** [React Router DOM](https://reactrouter.com/)
+- **Data Fetching & Caching:** [TanStack Query (React Query)](https://tanstack.com/query)
+- **Form Management:** [React Hook Form](https://react-hook-form.com/)
+- **Validation:** [Zod](https://zod.dev/) with `@hookform/resolvers`
+- **HTTP Client:** [Axios](https://axios-http.com/)
+
 ## Prerequisites
 
 - **Node.js version:** `>=22.12.0` (or `20.19.0+`)
