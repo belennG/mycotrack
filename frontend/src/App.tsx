@@ -1,12 +1,23 @@
+import { Routes, Route, Navigate } from 'react-router-dom'
+import AppLayout from './components/AppLayout'
+import Dashboard from './pages/Dashboard'
+import Trackings from './pages/Trackings'
+import TrackingForm from './pages/TrackingForm'
+import Settings from './pages/Settings'
+
 function App() {
   return (
-    <div style={{ display: 'grid', placeItems: 'center', minHeight: '100vh', fontFamily: 'system-ui, sans-serif' }}>
-      <main style={{ textAlign: 'center' }}>
-        <h1 style={{ fontSize: '2.5rem', marginBottom: '0.5rem' }}>MycoTrack</h1>
-        <p style={{ color: '#666' }}>Mushroom Cultivation & Environmental Tracking</p>
-      </main>
-    </div>
-  );
+    <Routes>
+      <Route element={<AppLayout />}>
+        <Route path="/" element={<Navigate to="/dashboard" replace />} />
+
+        <Route path="/dashboard" element={<Dashboard />} />
+        <Route path="/trackings" element={<Trackings />} />
+        <Route path="/trackings/new" element={<TrackingForm />} />
+        <Route path="/settings" element={<Settings />} />
+      </Route>
+    </Routes>
+  )
 }
 
-export default App;
+export default App
