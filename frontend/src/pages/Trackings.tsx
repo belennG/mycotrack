@@ -40,10 +40,10 @@ export default function Trackings() {
       {!isLoading && !isError && data && (
         <>
           <VStack align="stretch" gap={4}>
-            {data.data.length === 0 ? (
+            {data.items.length === 0 ? (
               <Text color="gray.500">No active trackings found.</Text>
             ) : (
-              data.data.map((item) => (
+              data.items.map((item) => (
                 <Flex
                   key={item.id}
                   p={4}
@@ -76,10 +76,10 @@ export default function Trackings() {
               Previous
             </Button>
             <Text fontSize="sm" color="gray.600">
-              Page {page} of {data.totalPages || 1}
+              Page {page} of {data.total || 1}
             </Text>
             <Button
-              disabled={page >= (data.totalPages || 1)}
+              disabled={page >= (data.total || 1)}
               onClick={() => setPage((old) => old + 1)}
             >
               Next

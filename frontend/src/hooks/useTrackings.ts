@@ -4,9 +4,9 @@ import type { Tracking, CreateTrackingPayload, PaginatedResponse } from '../type
 
 export function useTrackings(page: number = 1) {
   return useQuery({
-    queryKey: ['trackings', page],
+    queryKey: ['batches', page],
     queryFn: async () => {
-      const { data } = await apiClient.get<PaginatedResponse<Tracking>>(`/trackings?page=${page}`)
+      const { data } = await apiClient.get<PaginatedResponse<Tracking>>(`/batches?page=${page}`)
       return data
     },
   })
@@ -17,11 +17,11 @@ export function useCreateTracking() {
 
   return useMutation({
     mutationFn: async (newTracking: CreateTrackingPayload) => {
-      const { data } = await apiClient.post<Tracking>('/trackings', newTracking)
+      const { data } = await apiClient.post<Tracking>('/batches', newTracking)
       return data
     },
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['trackings'] })
+      queryClient.invalidateQueries({ queryKey: ['batches'] })
     },
   })
 }
@@ -29,9 +29,9 @@ export function useCreateTracking() {
 // --- GET SINGLE Hook (For Edit Mode) ---
 export function useTracking(id?: string) {
   return useQuery({
-    queryKey: ['trackings', id],
+    queryKey: ['batches', id],
     queryFn: async () => {
-      const { data } = await apiClient.get<Tracking>(`/trackings/${id}`)
+      const { data } = await apiClient.get<Tracking>(`/batches/${id}`)
       return data
     },
     enabled: !!id, // Only execute if an ID is provided
@@ -44,11 +44,11 @@ export function useUpdateTracking() {
 
   return useMutation({
     mutationFn: async ({ id, payload }: { id: string; payload: Partial<Tracking> }) => {
-      const { data } = await apiClient.put<Tracking>(`/trackings/${id}`, payload)
+      const { data } = await apiClient.put<Tracking>(`/batches/${id}`, payload)
       return data
     },
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['trackings'] })
+      queryClient.invalidateQueries({ queryKey: ['batches'] })
     },
   })
 }
