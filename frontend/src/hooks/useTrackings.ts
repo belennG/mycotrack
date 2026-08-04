@@ -25,3 +25,30 @@ export function useCreateTracking() {
     },
   })
 }
+
+// --- GET SINGLE Hook (For Edit Mode) ---
+export function useTracking(id?: string) {
+  return useQuery({
+    queryKey: ['trackings', id],
+    queryFn: async () => {
+      const { data } = await apiClient.get<Tracking>(`/trackings/${id}`)
+      return data
+    },
+    enabled: !!id, // Only execute if an ID is provided
+  })
+}
+
+// --- PUT Hook (Update existing tracking) ---
+export function useUpdateTracking() {
+  const queryClient = useQueryClient()
+
+  return useMutation({
+    mutationFn: async ({ id, payload }: { id: string; payload: Partial<Tracking> }) => {
+      const { data } = await apiClient.put<Tracking>(`/trackings/${id}`, payload)
+      return data
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['trackings'] })
+    },
+  })
+}
