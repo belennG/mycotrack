@@ -20,7 +20,6 @@ export type CreateTrackingPayload = Omit<
 
 // Generic type for paginated API responses
 export interface PaginatedResponse<T> {
-  data: T[];
-  page: number;
-  totalPages: number;
+  items: T[];
+  total: number;
 }
