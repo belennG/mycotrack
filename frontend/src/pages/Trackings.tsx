@@ -54,9 +54,9 @@ export default function Trackings() {
                   shadow="sm"
                 >
                   <Box>
-                    <Heading size="md">{item.name}</Heading>
+                    <Heading size="md">{item.batch_name}</Heading>
                     <Text fontSize="sm" color="gray.500">
-                      Last Updated: {new Date(item.lastUpdated).toLocaleDateString()}
+                      Last Updated: {new Date(item.updated_at).toLocaleDateString()}
                     </Text>
                   </Box>
                   <Box px={3} py={1} bg="teal.100" color="teal.800" borderRadius="full" fontSize="sm" fontWeight="bold">

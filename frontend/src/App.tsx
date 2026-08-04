@@ -14,6 +14,7 @@ function App() {
         <Route path="/dashboard" element={<Dashboard />} />
         <Route path="/trackings" element={<Trackings />} />
         <Route path="/trackings/new" element={<TrackingForm />} />
+        <Route path="/trackings/:id/edit" element={<TrackingForm />} />
         <Route path="/settings" element={<Settings />} />
       </Route>
     </Routes>
