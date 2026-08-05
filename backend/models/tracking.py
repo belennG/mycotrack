@@ -5,13 +5,13 @@ from datetime import datetime, timezone
 from models.base import BaseModel
 
 
-class DailyLog(BaseModel):
+class Tracking(BaseModel):
     """
-    SQLAlchemy model representing a daily environmental log for a batch.
+    SQLAlchemy model representing an environmental tracking for a batch.
     Includes constraints for valid measurement ranges.
     """
 
-    __tablename__ = "daily_logs"
+    __tablename__ = "trackings"
 
     batch_id = Column(
         UUID(as_uuid=True),
@@ -20,7 +20,7 @@ class DailyLog(BaseModel):
         index=True,
     )
 
-    log_date = Column(
+    tracking_date = Column(
         Date,
         default=lambda: datetime.now(timezone.utc).date(),
         nullable=False,
@@ -44,7 +44,7 @@ class DailyLog(BaseModel):
     )
 
     # Sets up a two-way relationship with the Batch model
-    batch = relationship("Batch", back_populates="daily_logs")
+    batch = relationship("Batch", back_populates="trackings")
 
     # Database-level constraints to prevent invalid data from ever being saved
     __table_args__ = (

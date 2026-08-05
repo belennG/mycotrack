@@ -49,8 +49,8 @@ class Batch(BaseModel):
         nullable=False,
     )
 
-    daily_logs = relationship(
-        "DailyLog", back_populates="batch", cascade="all, delete-orphan"
+    trackings = relationship(
+        "Tracking", back_populates="batch", cascade="all, delete-orphan"
     )
 
 

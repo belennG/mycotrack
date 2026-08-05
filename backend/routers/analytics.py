@@ -5,7 +5,7 @@ from typing import Optional
 from uuid import UUID
 
 from database import get_db
-from models.daily_log import DailyLog
+from mycotrack.backend.models.tracking import Tracking
 from models.batch import Batch
 from services.analytics import (
     calculate_averages,
@@ -41,23 +41,23 @@ def get_batch_analytics(
             status_code=status.HTTP_404_NOT_FOUND, detail="Batch not found"
         )
 
-    # 2. Fetch logs and apply date filters
-    query = db.query(DailyLog).filter(DailyLog.batch_id == batch_id)
+    # 2. Fetch trackings and apply date filters
+    query = db.query(Tracking).filter(Tracking.batch_id == batch_id)
     if date_from:
-        query = query.filter(DailyLog.log_date >= date_from)
+        query = query.filter(Tracking.tracking_date >= date_from)
     if date_to:
-        query = query.filter(DailyLog.log_date <= date_to)
+        query = query.filter(Tracking.tracking_date <= date_to)
 
-    logs = query.order_by(DailyLog.log_date.asc()).all()
+    trackings = query.order_by(Tracking.tracking_date.asc()).all()
 
-    if not logs:
+    if not trackings:
         return {
             "message": "No data available for this batch in the specified date range."
         }
 
     # 3. Calculate metrics via services
-    averages = calculate_averages(logs)
-    trends = analyze_trends(logs)
+    averages = calculate_averages(trackings)
+    trends = analyze_trends(trackings)
 
     # 4. Filter by specific metric if requested
     metrics_list = ["temperature", "humidity", "ph_level", "moisture"]
@@ -69,7 +69,9 @@ def get_batch_analytics(
     for metric in metrics_list:
         # Extract all non-null values for the current metric to find min/max
         values = [
-            getattr(log, metric) for log in logs if getattr(log, metric) is not None
+            getattr(tracking, metric)
+            for tracking in trackings
+            if getattr(tracking, metric) is not None
         ]
 
         statistics[metric] = {
@@ -81,7 +83,7 @@ def get_batch_analytics(
 
     return {
         "batch_id": batch_id,
-        "completeness_score": calculate_completeness(logs),
+        "completeness_score": calculate_completeness(trackings),
         "statistics": statistics,
     }
 
@@ -106,23 +108,23 @@ def get_batch_summary(batch_id: UUID, db: Session = Depends(get_db)):
             status_code=status.HTTP_404_NOT_FOUND, detail="Batch not found"
         )
 
-    logs = (
-        db.query(DailyLog)
-        .filter(DailyLog.batch_id == batch_id)
-        .order_by(DailyLog.log_date.asc())
+    trackings = (
+        db.query(Tracking)
+        .filter(Tracking.batch_id == batch_id)
+        .order_by(Tracking.tracking_date.asc())
         .all()
     )
 
-    key_metrics = calculate_averages(logs)
+    key_metrics = calculate_averages(trackings)
 
     alerts_count = 0
     health_status = "Healthy"
     active_alerts = []
 
-    # Evaluate health based on the most recent log
-    if logs:
-        latest_log = logs[-1]
-        active_alerts = generate_alerts(latest_log)
+    # Evaluate health based on the most recent tracking
+    if trackings:
+        latest_tracking = trackings[-1]
+        active_alerts = generate_alerts(latest_tracking)
         alerts_count = len(active_alerts)
 
         if alerts_count > 0:
