@@ -6,7 +6,7 @@ from models.batch import Batch
 from schemas.batch import BatchCreate, BatchUpdate, BatchResponse, BatchListResponse
 from database import get_db
 
-router = APIRouter(prefix="/api/batches", tags=["Batches"])
+router = APIRouter(prefix="/api/v1/batches", tags=["Batches"])
 
 
 @router.get("", response_model=BatchListResponse)
