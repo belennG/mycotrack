@@ -1,6 +1,7 @@
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query'
 import { apiClient } from '../api/client'
 import type { Tracking, CreateTrackingPayload, PaginatedResponse } from '../types/tracking'
+import { appToast } from '../utils/appToast'
 
 export function useTrackings(page: number = 1) {
   return useQuery({
@@ -22,7 +23,12 @@ export function useCreateTracking() {
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['batches'] })
+      appToast.success('Batch Created', 'Your new cultivation batch has been saved.')
     },
+    onError: (error: any) => {
+      const errorMessage = error.response?.data?.detail || 'An unexpected error occurred while saving.'
+      appToast.error('Failed to Create Batch', errorMessage)
+    }
   })
 }
 
