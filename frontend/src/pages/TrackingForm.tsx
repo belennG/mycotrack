@@ -83,10 +83,8 @@ export default function TrackingForm() {
         }
       if (isEditMode && id) {
         await updateMutation.mutateAsync({ id, payload })
-        alert('Tracking updated successfully!') // Basic toast replacement
       } else {
         await createMutation.mutateAsync(payload)
-        alert('Tracking created successfully!') // Basic toast replacement
       }
       navigate('/trackings')
     } catch (error) {
