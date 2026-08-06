@@ -3,6 +3,7 @@ from typing import Optional, List
 from pydantic import BaseModel, Field, ConfigDict
 from models.batch import BatchStatus
 from uuid import UUID
+from schemas.tracking import TrackingResponse
 
 
 class BatchBase(BaseModel):
@@ -64,3 +65,14 @@ class BatchListResponse(BaseModel):
 
     total: int
     items: List[BatchResponse]
+
+
+class DashboardBatch(BatchResponse):
+    latest_tracking: TrackingResponse | None = None
+
+
+class DashboardResponse(BaseModel):
+    ACTIVE: List[DashboardBatch] = []
+    COMPLETED: List[DashboardBatch] = []
+    FAILED: List[DashboardBatch] = []
+    ARCHIVED: List[DashboardBatch] = []
