@@ -1,5 +1,5 @@
 from typing import List, Dict, Any
-from models.daily_log import DailyLog
+from models.tracking import Tracking
 
 # Configurable default thresholds (e.g., ideal for Oyster mushrooms)
 # These can easily be overridden by passing a custom dictionary to the function
@@ -12,10 +12,10 @@ DEFAULT_THRESHOLDS = {
 
 
 def generate_alerts(
-    log: DailyLog, thresholds: Dict[str, Dict[str, float]] | None = None
+    tracking: Tracking, thresholds: Dict[str, Dict[str, float]] | None = None
 ) -> List[Dict[str, Any]]:
     """
-    Evaluates a single daily log against environmental thresholds.
+    Evaluates a single daily tracking against environmental thresholds.
     Generates specific alert types for deviations and missing data.
     """
     if thresholds is None:
@@ -27,14 +27,14 @@ def generate_alerts(
     metrics = ["temperature", "humidity", "ph_level", "moisture"]
 
     for metric in metrics:
-        value = getattr(log, metric, None)
+        value = getattr(tracking, metric, None)
         readable_metric = metric.replace("_", " ").title()
 
         # 1. Missing Data Alert
         if value is None:
             alerts.append(
                 {
-                    "batch_id": log.batch_id,
+                    "batch_id": tracking.batch_id,
                     "alert_type": "missing_data",
                     "severity": "warning",
                     "message": f"Missing data alert: No reading recorded for {readable_metric}.",
@@ -60,7 +60,7 @@ def generate_alerts(
 
             alerts.append(
                 {
-                    "batch_id": log.batch_id,
+                    "batch_id": tracking.batch_id,
                     "alert_type": alert_type_mapping.get(metric, "unknown_anomaly"),
                     "severity": "critical",
                     "message": (

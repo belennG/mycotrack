@@ -46,8 +46,8 @@ export default function Header() {
 
       <HStack gap={6} display={{ base: 'none', md: 'flex' }}>
         <NavLink to="/dashboard" style={({ isActive }) => ({ fontWeight: isActive ? 'bold' : 'normal' })}>Dashboard</NavLink>
-        <NavLink to="/trackings" end style={({ isActive }) => ({ fontWeight: isActive ? 'bold' : 'normal' })}>Trackings</NavLink>
-        <NavLink to="/trackings/new" style={({ isActive }) => ({ fontWeight: isActive ? 'bold' : 'normal' })}>New Entry</NavLink>
+        <NavLink to="/batches/:batchId/trackings" end style={({ isActive }) => ({ fontWeight: isActive ? 'bold' : 'normal' })}>Trackings</NavLink>
+        <NavLink to="/batches/new" style={({ isActive }) => ({ fontWeight: isActive ? 'bold' : 'normal' })}>New Entry</NavLink>
         <NavLink to="/settings" style={({ isActive }) => ({ fontWeight: isActive ? 'bold' : 'normal' })}>Settings</NavLink>
       </HStack>
 

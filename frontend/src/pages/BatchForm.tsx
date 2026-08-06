@@ -4,12 +4,12 @@ import { useForm } from 'react-hook-form'
 import { zodResolver } from '@hookform/resolvers/zod'
 import { z } from 'zod'
 import { Box, Button, Flex, Heading, Input, Textarea, VStack, Text, Image, createListCollection } from '@chakra-ui/react'
-import { useTracking, useCreateTracking, useUpdateTracking } from '../hooks/useTrackings'
+import { useBatch, useCreateBatch, useUpdateBatch } from '../hooks/useBatches'
 import ControlledSelect from '../components/ControlledSelect'
 
 const STATUS_OPTIONS = ['ACTIVE', 'COMPLETED', 'FAILED', 'ARCHIVED'] as const
 
-const trackingSchema = z.object({
+const batchesSchema = z.object({
   batch_name: z.string().min(1, 'Batch name is required'),
   crop_type: z.string().min(1, 'Crop type is required'),
   status: z.enum(STATUS_OPTIONS),
@@ -19,7 +19,7 @@ const trackingSchema = z.object({
   notes: z.string().optional(),
 })
 
-type TrackingFormData = z.infer<typeof trackingSchema>
+type BatchFormData = z.infer<typeof batchesSchema>
 
 const statusCollection = createListCollection({
   items: STATUS_OPTIONS.map((status) => ({
@@ -28,16 +28,16 @@ const statusCollection = createListCollection({
   })),
 })
 
-export default function TrackingForm() {
+export default function BatchForm() {
   const { id } = useParams()
   const navigate = useNavigate()
   const isEditMode = Boolean(id)
 
   const [imagePreview, setImagePreview] = useState<string | null>(null)
 
-  const { data: existingData, isLoading: isLoadingExisting } = useTracking(id)
-  const createMutation = useCreateTracking()
-  const updateMutation = useUpdateTracking()
+  const { data: existingData, isLoading: isLoadingExisting } = useBatch(id)
+  const createMutation = useCreateBatch()
+  const updateMutation = useUpdateBatch()
 
   const {
     register,
@@ -45,8 +45,8 @@ export default function TrackingForm() {
     control,
     reset,
     formState: { errors, isSubmitting },
-  } = useForm<TrackingFormData>({
-    resolver: zodResolver(trackingSchema),
+  } = useForm<BatchFormData>({
+    resolver: zodResolver(batchesSchema),
     defaultValues: {
       status: 'ACTIVE',
       start_date: new Date().toISOString().split('T')[0],
@@ -74,7 +74,7 @@ export default function TrackingForm() {
     }
   }
 
-  const onSubmit = async (data: TrackingFormData) => {
+  const onSubmit = async (data: BatchFormData) => {
     try {
         const payload = {
           ...data,
@@ -86,7 +86,7 @@ export default function TrackingForm() {
       } else {
         await createMutation.mutateAsync(payload)
       }
-      navigate('/trackings')
+      navigate('/dashboard')
     } catch (error) {
       alert('An error occurred while saving.')
     }
@@ -164,7 +164,7 @@ export default function TrackingForm() {
           </Box>
 
           <Flex justify="flex-end" gap={4} mt={4}>
-            <Button variant="outline" onClick={() => navigate('/trackings')}>
+            <Button variant="outline" onClick={() => navigate('/dashboard')}>
               Cancel
             </Button>
             <Button colorScheme="teal" type="submit" disabled={isSubmitting}>
