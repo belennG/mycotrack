@@ -1,7 +1,6 @@
 from fastapi import FastAPI
 from middleware.cors import setup_cors
-from mycotrack.backend.routers import trackings
-from routers import analytics, alerts, batches
+from routers import analytics, alerts, batches, trackings
 
 # Application factory pattern / initialization
 app = FastAPI(

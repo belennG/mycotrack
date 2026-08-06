@@ -1,5 +1,5 @@
 from typing import List, Dict, Any
-from mycotrack.backend.models.tracking import Tracking
+from models.tracking import Tracking
 
 
 def calculate_averages(trackings: List[Tracking]) -> Dict[str, float]:

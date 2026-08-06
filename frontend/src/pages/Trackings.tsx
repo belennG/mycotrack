@@ -1,11 +1,17 @@
 import { useState } from 'react'
-import { Box, Heading, Text, Button, VStack, HStack, Flex } from '@chakra-ui/react'
+import { useParams } from 'react-router-dom'
+import { Box, Heading, Text, Button, VStack, HStack, Flex, SimpleGrid } from '@chakra-ui/react'
 import { useTrackings } from '../hooks/useTrackings'
 
 export default function Trackings() {
+  const { batchId } = useParams<{ batchId: string }>()
   const [page, setPage] = useState(1)
 
-  const { data, isLoading, isError, refetch } = useTrackings(page)
+  const { data, isLoading, isError, refetch } = useTrackings(batchId || '', page)
+
+  if (!batchId) {
+    return <Text color="red.500">Error: No Batch ID provided in the URL.</Text>
+  }
 
   return (
     <Box>
@@ -36,33 +42,50 @@ export default function Trackings() {
         </Box>
       )}
 
-      {/* SUCCESS / DATA STATE */}
+ {/* SUCCESS / DATA STATE */}
       {!isLoading && !isError && data && (
         <>
           <VStack align="stretch" gap={4}>
             {data.items.length === 0 ? (
-              <Text color="gray.500">No active trackings found.</Text>
+              <Text color="gray.500">No logs found for this batch.</Text>
             ) : (
               data.items.map((item) => (
-                <Flex
-                  key={item.id}
-                  p={4}
-                  borderWidth="1px"
-                  borderRadius="md"
-                  justify="space-between"
-                  align="center"
-                  shadow="sm"
-                >
-                  <Box>
-                    <Heading size="md">{item.batch_name}</Heading>
-                    <Text fontSize="sm" color="gray.500">
-                      Last Updated: {new Date(item.updated_at).toLocaleDateString()}
+                <Box key={item.id} p={4} borderWidth="1px" borderRadius="md" shadow="sm">
+                  <Flex justify="space-between" align="center" mb={2}>
+                    <Heading size="sm">
+                      Log Date: {new Date(item.tracking_date).toLocaleDateString()}
+                    </Heading>
+                    <Text fontSize="xs" color="gray.500">
+                      Added: {new Date(item.created_at).toLocaleTimeString()}
                     </Text>
-                  </Box>
-                  <Box px={3} py={1} bg="teal.100" color="teal.800" borderRadius="full" fontSize="sm" fontWeight="bold">
-                    {item.status}
-                  </Box>
-                </Flex>
+                  </Flex>
+
+                  {/* Displaying actual Tracking data */}
+                  <SimpleGrid columns={4} gap={4} mt={3}>
+                    <Box>
+                      <Text fontSize="xs" color="gray.500">Temp</Text>
+                      <Text fontWeight="bold">{item.temperature || '--'} °C</Text>
+                    </Box>
+                    <Box>
+                      <Text fontSize="xs" color="gray.500">Humidity</Text>
+                      <Text fontWeight="bold">{item.humidity || '--'} %</Text>
+                    </Box>
+                    <Box>
+                      <Text fontSize="xs" color="gray.500">pH Level</Text>
+                      <Text fontWeight="bold">{item.ph_level || '--'}</Text>
+                    </Box>
+                    <Box>
+                      <Text fontSize="xs" color="gray.500">Moisture</Text>
+                      <Text fontWeight="bold">{item.moisture || '--'} %</Text>
+                    </Box>
+                  </SimpleGrid>
+
+                  {item.notes && (
+                    <Text mt={3} fontSize="sm" color="gray.700" bg="gray.50" p={2} borderRadius="md">
+                      {item.notes}
+                    </Text>
+                  )}
+                </Box>
               ))
             )}
           </VStack>
@@ -76,10 +99,10 @@ export default function Trackings() {
               Previous
             </Button>
             <Text fontSize="sm" color="gray.600">
-              Page {page} of {data.total || 1}
+              Page {page} of {Math.ceil((data.total || 1) / 10)}
             </Text>
             <Button
-              disabled={page >= (data.total || 1)}
+              disabled={page >= Math.ceil((data.total || 1) / 10)}
               onClick={() => setPage((old) => old + 1)}
             >
               Next

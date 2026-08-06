@@ -1,7 +1,11 @@
+from sqlalchemy.orm._orm_constructors import mapped_column
+
+from sqlalchemy.orm.base import Mapped
+
 from sqlalchemy import Column, Date, Float, Text, DateTime, ForeignKey, CheckConstraint
 from sqlalchemy.dialects.postgresql import UUID
 from sqlalchemy.orm import relationship
-from datetime import datetime, timezone
+from datetime import date, datetime, timezone
 from models.base import BaseModel
 
 
@@ -20,7 +24,7 @@ class Tracking(BaseModel):
         index=True,
     )
 
-    tracking_date = Column(
+    tracking_date: Mapped[date] = mapped_column(
         Date,
         default=lambda: datetime.now(timezone.utc).date(),
         nullable=False,

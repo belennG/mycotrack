@@ -1,5 +1,5 @@
 from typing import List, Dict, Any
-from mycotrack.backend.models.tracking import Tracking
+from models.tracking import Tracking
 
 # Configurable default thresholds (e.g., ideal for Oyster mushrooms)
 # These can easily be overridden by passing a custom dictionary to the function

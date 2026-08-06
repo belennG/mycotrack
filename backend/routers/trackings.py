@@ -4,9 +4,9 @@ from datetime import date
 from typing import Optional
 from uuid import UUID
 from database import get_db
-from mycotrack.backend.models.tracking import Tracking
+from models.tracking import Tracking
 from models.batch import Batch
-from mycotrack.backend.schemas.tracking import (
+from schemas.tracking import (
     TrackingCreate,
     TrackingUpdate,
     TrackingResponse,

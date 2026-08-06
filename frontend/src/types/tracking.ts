@@ -1,25 +1,29 @@
-export type BatchStatus = 'ACTIVE' | 'COMPLETED' | 'FAILED' | 'ARCHIVED'
+// src/types/tracking.ts
+
 export interface Tracking {
-  id: string;
-  batch_name: string;
-  crop_type: string;
-  status: BatchStatus;
-  start_date: string;
-  expected_harvest_date: string;
-  actual_harvest_date?: string | null;
-  location: string;
-  notes?: string | null;
-  created_at: string;
-  updated_at: string;
+  id: string; // UUID from BaseModel
+  batch_id: string; // UUID
+  tracking_date: string; // ISO Date string (YYYY-MM-DD)
+  temperature: number | null;
+  humidity: number | null;
+  ph_level: number | null;
+  moisture: number | null;
+  notes: string | null;
+  created_at: string; // ISO DateTime string
+  updated_at: string; // ISO DateTime string
 }
 
-export type CreateTrackingPayload = Omit<
-  Tracking,
-  'id' | 'created_at' | 'updated_at' | 'actual_harvest_date'
->;
+export interface CreateTrackingPayload {
+  batch_id: string;
+  tracking_date?: string; // Optional, defaults to today on backend
+  temperature?: number;
+  humidity?: number;
+  ph_level?: number;
+  moisture?: number;
+  notes?: string;
+}
 
-// Generic type for paginated API responses
 export interface PaginatedResponse<T> {
-  items: T[];
   total: number;
+  items: T[];
 }
