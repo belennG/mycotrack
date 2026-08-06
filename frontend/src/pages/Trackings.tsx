@@ -42,7 +42,7 @@ export default function Trackings() {
         </Box>
       )}
 
- {/* SUCCESS / DATA STATE */}
+      {/* SUCCESS / DATA STATE */}
       {!isLoading && !isError && data && (
         <>
           <VStack align="stretch" gap={4}>
@@ -63,25 +63,40 @@ export default function Trackings() {
                   {/* Displaying actual Tracking data */}
                   <SimpleGrid columns={4} gap={4} mt={3}>
                     <Box>
-                      <Text fontSize="xs" color="gray.500">Temp</Text>
+                      <Text fontSize="xs" color="gray.500">
+                        Temp
+                      </Text>
                       <Text fontWeight="bold">{item.temperature || '--'} °C</Text>
                     </Box>
                     <Box>
-                      <Text fontSize="xs" color="gray.500">Humidity</Text>
+                      <Text fontSize="xs" color="gray.500">
+                        Humidity
+                      </Text>
                       <Text fontWeight="bold">{item.humidity || '--'} %</Text>
                     </Box>
                     <Box>
-                      <Text fontSize="xs" color="gray.500">pH Level</Text>
+                      <Text fontSize="xs" color="gray.500">
+                        pH Level
+                      </Text>
                       <Text fontWeight="bold">{item.ph_level || '--'}</Text>
                     </Box>
                     <Box>
-                      <Text fontSize="xs" color="gray.500">Moisture</Text>
+                      <Text fontSize="xs" color="gray.500">
+                        Moisture
+                      </Text>
                       <Text fontWeight="bold">{item.moisture || '--'} %</Text>
                     </Box>
                   </SimpleGrid>
 
                   {item.notes && (
-                    <Text mt={3} fontSize="sm" color="gray.700" bg="gray.50" p={2} borderRadius="md">
+                    <Text
+                      mt={3}
+                      fontSize="sm"
+                      color="gray.700"
+                      bg="gray.50"
+                      p={2}
+                      borderRadius="md"
+                    >
                       {item.notes}
                     </Text>
                   )}
@@ -92,10 +107,7 @@ export default function Trackings() {
 
           {/* PAGINATION CONTROLS */}
           <HStack justify="space-between" mt={8}>
-            <Button
-              disabled={page === 1}
-              onClick={() => setPage((old) => Math.max(old - 1, 1))}
-            >
+            <Button disabled={page === 1} onClick={() => setPage((old) => Math.max(old - 1, 1))}>
               Previous
             </Button>
             <Text fontSize="sm" color="gray.600">

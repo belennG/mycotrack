@@ -45,10 +45,31 @@ export default function Header() {
       </Heading>
 
       <HStack gap={6} display={{ base: 'none', md: 'flex' }}>
-        <NavLink to="/dashboard" style={({ isActive }) => ({ fontWeight: isActive ? 'bold' : 'normal' })}>Dashboard</NavLink>
-        <NavLink to="/batches/:batchId/trackings" end style={({ isActive }) => ({ fontWeight: isActive ? 'bold' : 'normal' })}>Trackings</NavLink>
-        <NavLink to="/batches/new" style={({ isActive }) => ({ fontWeight: isActive ? 'bold' : 'normal' })}>New Entry</NavLink>
-        <NavLink to="/settings" style={({ isActive }) => ({ fontWeight: isActive ? 'bold' : 'normal' })}>Settings</NavLink>
+        <NavLink
+          to="/dashboard"
+          style={({ isActive }) => ({ fontWeight: isActive ? 'bold' : 'normal' })}
+        >
+          Dashboard
+        </NavLink>
+        <NavLink
+          to="/batches/:batchId/trackings"
+          end
+          style={({ isActive }) => ({ fontWeight: isActive ? 'bold' : 'normal' })}
+        >
+          Trackings
+        </NavLink>
+        <NavLink
+          to="/batches/new"
+          style={({ isActive }) => ({ fontWeight: isActive ? 'bold' : 'normal' })}
+        >
+          New Entry
+        </NavLink>
+        <NavLink
+          to="/settings"
+          style={({ isActive }) => ({ fontWeight: isActive ? 'bold' : 'normal' })}
+        >
+          Settings
+        </NavLink>
       </HStack>
 
       <Button onClick={toggleTheme} variant="outline" size="sm">

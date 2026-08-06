@@ -13,8 +13,8 @@ export default function ControlledSelect<T extends FieldValues>({
   name,
   control,
   collection,
-  placeholder = "Select option",
-  error
+  placeholder = 'Select option',
+  error,
 }: ControlledSelectProps<T>) {
   return (
     <Box>
@@ -53,7 +53,11 @@ export default function ControlledSelect<T extends FieldValues>({
           </Select.Root>
         )}
       />
-      {error && <Text color="red.500" fontSize="sm" mt={1}>{error}</Text>}
+      {error && (
+        <Text color="red.500" fontSize="sm" mt={1}>
+          {error}
+        </Text>
+      )}
     </Box>
   )
 }

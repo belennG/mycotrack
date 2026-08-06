@@ -9,7 +9,8 @@
     "lint": "oxlint",
     "preview": "vite preview",
     "test": "vitest run",
-    "prepare": "husky || true"
+    "prepare": "husky || true",
+    "format": "prettier --write \"src/**/*.{js,jsx,ts,tsx,css,md}\""
   },
   "dependencies": {
     "@chakra-ui/react": "^3.36.1",
@@ -33,6 +34,7 @@
     "@vitejs/plugin-react": "^6.0.4",
     "husky": "^9.1.7",
     "oxlint": "^1.77.0",
+    "prettier": "^3.9.6",
     "typescript": "~6.0.2",
     "vite": "^8.2.0",
     "vitest": "^4.1.10"

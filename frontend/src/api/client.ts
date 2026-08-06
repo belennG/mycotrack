@@ -13,5 +13,5 @@ apiClient.interceptors.response.use(
     // @TODO expand this to trigger a Chakra UI toast notification
     console.error('Global API Error:', error.response?.data || error.message)
     return Promise.reject(error)
-  }
+  },
 )
