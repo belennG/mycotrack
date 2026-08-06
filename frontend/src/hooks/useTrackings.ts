@@ -8,7 +8,9 @@ export function useTrackings(batchId: string, page: number = 1, limit: number = 
     queryKey: ['trackings', batchId, page],
     queryFn: async () => {
       const skip = (page - 1) * limit
-      const { data } = await apiClient.get<PaginatedResponse<Tracking>>(`/v1/trackings/?batch_id=${batchId}&skip=${skip}&limit=${limit}`)
+      const { data } = await apiClient.get<PaginatedResponse<Tracking>>(
+        `/v1/trackings/?batch_id=${batchId}&skip=${skip}&limit=${limit}`,
+      )
       return data
     },
     enabled: !!batchId,
@@ -39,9 +41,10 @@ export function useCreateTracking() {
       appToast.success('Tracking added', 'Tracking entry saved successfully.')
     },
     onError: (error: any) => {
-      const errorMessage = error.response?.data?.detail || 'An unexpected error occurred while saving.'
+      const errorMessage =
+        error.response?.data?.detail || 'An unexpected error occurred while saving.'
       appToast.error('Failed to Add Tracking', errorMessage)
-    }
+    },
   })
 }
 
@@ -81,6 +84,6 @@ export function useDeleteTracking() {
     onError: (error: any) => {
       const errorMessage = error.response?.data?.detail || 'Could not delete entry.'
       appToast.error('Delete Failed', errorMessage)
-    }
+    },
   })
 }

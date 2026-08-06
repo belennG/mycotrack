@@ -27,15 +27,17 @@ const queryClient = new QueryClient({
 ReactDOM.createRoot(document.getElementById('root')!).render(
   <StrictMode>
     <ChakraProvider value={system}>
-      <ErrorBoundary FallbackComponent={GlobalErrorBoundary}
-        onReset={() => window.location.reload()}>
+      <ErrorBoundary
+        FallbackComponent={GlobalErrorBoundary}
+        onReset={() => window.location.reload()}
+      >
         <QueryClientProvider client={queryClient}>
-                <BrowserRouter>
-                  <App />
-                  <Toaster />
-                </BrowserRouter>
+          <BrowserRouter>
+            <App />
+            <Toaster />
+          </BrowserRouter>
         </QueryClientProvider>
       </ErrorBoundary>
     </ChakraProvider>
-  </StrictMode>
+  </StrictMode>,
 )

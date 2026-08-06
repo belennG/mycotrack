@@ -39,7 +39,7 @@ export function useCreateBatch() {
     onError: (error: any) => {
       const errorMessage = error.response?.data?.detail || 'An unexpected error occurred.'
       appToast.error('Failed to Create Batch', errorMessage)
-    }
+    },
   })
 }
 

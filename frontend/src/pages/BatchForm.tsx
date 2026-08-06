@@ -3,7 +3,18 @@ import { useParams, useNavigate } from 'react-router-dom'
 import { useForm } from 'react-hook-form'
 import { zodResolver } from '@hookform/resolvers/zod'
 import { z } from 'zod'
-import { Box, Button, Flex, Heading, Input, Textarea, VStack, Text, Image, createListCollection } from '@chakra-ui/react'
+import {
+  Box,
+  Button,
+  Flex,
+  Heading,
+  Input,
+  Textarea,
+  VStack,
+  Text,
+  Image,
+  createListCollection,
+} from '@chakra-ui/react'
 import { useBatch, useCreateBatch, useUpdateBatch } from '../hooks/useBatches'
 import ControlledSelect from '../components/ControlledSelect'
 
@@ -76,11 +87,11 @@ export default function BatchForm() {
 
   const onSubmit = async (data: BatchFormData) => {
     try {
-        const payload = {
-          ...data,
-          start_date: new Date(data.start_date).toISOString(),
-          expected_harvest_date: new Date(data.expected_harvest_date).toISOString(),
-        }
+      const payload = {
+        ...data,
+        start_date: new Date(data.start_date).toISOString(),
+        expected_harvest_date: new Date(data.expected_harvest_date).toISOString(),
+      }
       if (isEditMode && id) {
         await updateMutation.mutateAsync({ id, payload })
       } else {
@@ -102,34 +113,55 @@ export default function BatchForm() {
 
       <form onSubmit={handleSubmit(onSubmit)}>
         <VStack align="stretch" gap={4}>
-
           <Box>
-            <Text fontWeight="bold" mb={1}>Batch Name *</Text>
+            <Text fontWeight="bold" mb={1}>
+              Batch Name *
+            </Text>
             <Input {...register('batch_name')} placeholder="e.g., Golden Teacher Batch #1" />
-            {errors.batch_name && <Text color="red.500" fontSize="sm">{errors.batch_name.message}</Text>}
+            {errors.batch_name && (
+              <Text color="red.500" fontSize="sm">
+                {errors.batch_name.message}
+              </Text>
+            )}
           </Box>
 
           <Box>
-            <Text fontWeight="bold" mb={1}>Species</Text>
+            <Text fontWeight="bold" mb={1}>
+              Species
+            </Text>
             <Input {...register('crop_type')} placeholder="e.g., Psilocybe cubensis" />
           </Box>
 
           <Flex gap={4}>
             <Box flex={1}>
-              <Text fontWeight="bold" mb={1}>Start Date *</Text>
+              <Text fontWeight="bold" mb={1}>
+                Start Date *
+              </Text>
               <Input type="date" {...register('start_date')} />
-              {errors.start_date && <Text color="red.500" fontSize="sm">{errors.start_date.message}</Text>}
+              {errors.start_date && (
+                <Text color="red.500" fontSize="sm">
+                  {errors.start_date.message}
+                </Text>
+              )}
             </Box>
             <Box flex={1}>
-                <Text fontWeight="bold" mb={1}>Expected Harvest *</Text>
-                <Input type="date" {...register('expected_harvest_date')} />
-                {errors.expected_harvest_date && <Text color="red.500" fontSize="sm">{errors.expected_harvest_date.message}</Text>}
+              <Text fontWeight="bold" mb={1}>
+                Expected Harvest *
+              </Text>
+              <Input type="date" {...register('expected_harvest_date')} />
+              {errors.expected_harvest_date && (
+                <Text color="red.500" fontSize="sm">
+                  {errors.expected_harvest_date.message}
+                </Text>
+              )}
             </Box>
           </Flex>
 
           <Flex gap={4}>
             <Box flex={1}>
-              <Text fontWeight="bold" mb={1}>Status *</Text>
+              <Text fontWeight="bold" mb={1}>
+                Status *
+              </Text>
               <ControlledSelect
                 name="status"
                 control={control}
@@ -137,27 +169,43 @@ export default function BatchForm() {
                 placeholder="Select status"
                 error={errors.status?.message}
               />
-              {errors.status && <Text color="red.500" fontSize="sm">{errors.status.message}</Text>}
+              {errors.status && (
+                <Text color="red.500" fontSize="sm">
+                  {errors.status.message}
+                </Text>
+              )}
             </Box>
             <Box flex={1}>
-              <Text fontWeight="bold" mb={1}>Location *</Text>
+              <Text fontWeight="bold" mb={1}>
+                Location *
+              </Text>
               <Input {...register('location')} placeholder="e.g., Greenhouse Room A" />
-              {errors.location && <Text color="red.500" fontSize="sm">{errors.location.message}</Text>}
+              {errors.location && (
+                <Text color="red.500" fontSize="sm">
+                  {errors.location.message}
+                </Text>
+              )}
             </Box>
           </Flex>
 
           <Box>
-            <Text fontWeight="bold" mb={1}>Notes</Text>
+            <Text fontWeight="bold" mb={1}>
+              Notes
+            </Text>
             <Textarea {...register('notes')} placeholder="Log substrate, temps, humidity..." />
           </Box>
 
           {/* Optional Image Upload UI */}
           <Box p={4} borderWidth="1px" borderRadius="md" borderStyle="dashed">
-            <Text fontWeight="bold" mb={2}>Upload Image (Optional)</Text>
+            <Text fontWeight="bold" mb={2}>
+              Upload Image (Optional)
+            </Text>
             <Input type="file" accept="image/*" onChange={handleImageChange} p={1} />
             {imagePreview && (
               <Box mt={4}>
-                <Text fontSize="sm" mb={1}>Preview:</Text>
+                <Text fontSize="sm" mb={1}>
+                  Preview:
+                </Text>
                 <Image src={imagePreview} alt="Preview" maxH="200px" borderRadius="md" />
               </Box>
             )}
@@ -171,7 +219,6 @@ export default function BatchForm() {
               {isSubmitting ? 'Saving...' : 'Save Entry'}
             </Button>
           </Flex>
-
         </VStack>
       </form>
     </Box>

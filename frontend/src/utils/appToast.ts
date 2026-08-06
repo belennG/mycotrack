@@ -28,5 +28,5 @@ export const appToast = {
       type: 'info',
       duration: 4000,
     })
-  }
+  },
 }
