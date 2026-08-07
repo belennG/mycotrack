@@ -1,7 +1,13 @@
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query'
 import { apiClient } from '../api/client'
 import { appToast } from '../utils/appToast'
-import type { Batch, CreateBatchPayload, PaginatedResponse } from '../types/batch'
+import type {
+  Batch,
+  CreateBatchPayload,
+  DashboardResponse,
+  PaginatedResponse,
+} from '../types/batch'
+import { useNavigate } from 'react-router-dom'
 
 export function useBatches(page: number = 1) {
   return useQuery({
@@ -26,14 +32,16 @@ export function useBatch(id?: string) {
 
 export function useCreateBatch() {
   const queryClient = useQueryClient()
+  const navigate = useNavigate()
 
   return useMutation({
     mutationFn: async (newBatch: CreateBatchPayload) => {
       const { data } = await apiClient.post<Batch>('/v1/batches', newBatch)
       return data
     },
-    onSuccess: () => {
+    onSuccess: (createdBatch: Batch) => {
       queryClient.invalidateQueries({ queryKey: ['batches'] })
+      navigate(`/batches/${createdBatch.id}/trackings`)
       appToast.success('Batch Created', 'Your new cultivation batch has been saved.')
     },
     onError: (error: any) => {
@@ -55,6 +63,16 @@ export function useUpdateBatch() {
       queryClient.invalidateQueries({ queryKey: ['batch', data.id] })
       queryClient.invalidateQueries({ queryKey: ['batches'] })
       appToast.success('Batch Updated', 'Batch details saved successfully.')
+    },
+  })
+}
+
+export function useDashboard() {
+  return useQuery({
+    queryKey: ['dashboard'],
+    queryFn: async () => {
+      const { data } = await apiClient.get<DashboardResponse>('/v1/batches/dashboard')
+      return data
     },
   })
 }
