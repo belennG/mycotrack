@@ -50,7 +50,10 @@ class Batch(BaseModel):
     )
 
     trackings = relationship(
-        "Tracking", back_populates="batch", cascade="all, delete-orphan"
+        "Tracking",
+        back_populates="batch",
+        cascade="all, delete-orphan",
+        order_by="desc(Tracking.created_at)",
     )
 
 

@@ -52,19 +52,6 @@ export default function Header() {
           Dashboard
         </NavLink>
         <NavLink
-          to="/batches/:batchId/trackings"
-          end
-          style={({ isActive }) => ({ fontWeight: isActive ? 'bold' : 'normal' })}
-        >
-          Trackings
-        </NavLink>
-        <NavLink
-          to="/batches/new"
-          style={({ isActive }) => ({ fontWeight: isActive ? 'bold' : 'normal' })}
-        >
-          New Entry
-        </NavLink>
-        <NavLink
           to="/settings"
           style={({ isActive }) => ({ fontWeight: isActive ? 'bold' : 'normal' })}
         >

@@ -1,6 +1,3 @@
-from datetime import date
-from typing import cast
-
 from sqlalchemy.orm.strategy_options import joinedload
 
 from fastapi import APIRouter, Depends, HTTPException, status
@@ -17,6 +14,7 @@ from schemas.batch import (
     DashboardBatch,
 )
 from database import get_db
+from schemas.tracking import TrackingResponse
 
 router = APIRouter(prefix="/api/v1/batches", tags=["Batches"])
 
@@ -24,7 +22,12 @@ router = APIRouter(prefix="/api/v1/batches", tags=["Batches"])
 @router.get("/dashboard", response_model=DashboardResponse)
 def get_dashboard(db: Session = Depends(get_db)):
     # Fetch all batches and eagerly load their trackings to prevent N+1 queries
-    batches = db.query(Batch).options(joinedload(Batch.trackings)).all()
+    batches = (
+        db.query(Batch)
+        .options(joinedload(Batch.trackings))
+        .order_by(Batch.updated_at.desc())
+        .all()
+    )
 
     dashboard_data: dict[str, list] = {
         "ACTIVE": [],
@@ -34,15 +37,12 @@ def get_dashboard(db: Session = Depends(get_db)):
     }
 
     for batch in batches:
-        # Sort trackings by date to find the latest one
-        sorted_trackings = sorted(
-            batch.trackings, key=lambda x: cast(date, x.tracking_date), reverse=True
-        )
-        latest = sorted_trackings[0] if sorted_trackings else None
+        latest = batch.trackings[0] if batch.trackings else None
 
         # Convert SQLAlchemy model to Pydantic DashboardBatch schema
         batch_data = DashboardBatch.model_validate(batch)
-        batch_data.latest_tracking = latest
+        if latest:
+            batch_data.latest_tracking = TrackingResponse.model_validate(latest)
 
         # Append to the correct status group
         if batch.status in dashboard_data:

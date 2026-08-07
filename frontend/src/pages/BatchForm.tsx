@@ -94,10 +94,10 @@ export default function BatchForm() {
       }
       if (isEditMode && id) {
         await updateMutation.mutateAsync({ id, payload })
+        navigate('/dashboard')
       } else {
         await createMutation.mutateAsync(payload)
       }
-      navigate('/dashboard')
     } catch (error) {
       alert('An error occurred while saving.')
     }

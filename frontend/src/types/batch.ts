@@ -1,3 +1,5 @@
+import type { Tracking } from './tracking'
+
 export type BatchStatus = 'ACTIVE' | 'COMPLETED' | 'FAILED' | 'ARCHIVED'
 export interface Batch {
   id: string
@@ -22,4 +24,15 @@ export type CreateBatchPayload = Omit<
 export interface PaginatedResponse<T> {
   items: T[]
   total: number
+}
+
+export interface DashboardBatch extends Batch {
+  latest_tracking: Tracking | null
+}
+
+export interface DashboardResponse {
+  ACTIVE: DashboardBatch[]
+  COMPLETED: DashboardBatch[]
+  FAILED: DashboardBatch[]
+  ARCHIVED: DashboardBatch[]
 }
