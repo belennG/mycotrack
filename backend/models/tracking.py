@@ -1,11 +1,12 @@
+from typing import Optional
+import uuid
+from models.batch import Batch
 from sqlalchemy.orm._orm_constructors import mapped_column
-
 from sqlalchemy.orm.base import Mapped
-
-from sqlalchemy import Column, Date, Float, Text, DateTime, ForeignKey, CheckConstraint
-from sqlalchemy.dialects.postgresql import UUID
+from sqlalchemy import Float, Text, DateTime, ForeignKey, CheckConstraint
+from sqlalchemy.dialects.postgresql import UUID as PG_UUID
 from sqlalchemy.orm import relationship
-from datetime import date, datetime, timezone
+from datetime import datetime, timezone
 from models.base import BaseModel
 
 
@@ -17,38 +18,34 @@ class Tracking(BaseModel):
 
     __tablename__ = "trackings"
 
-    batch_id = Column(
-        UUID(as_uuid=True),
+    batch_id: Mapped[uuid.UUID] = mapped_column(
+        PG_UUID(as_uuid=True),
         ForeignKey("batches.id", ondelete="CASCADE"),
-        nullable=False,
         index=True,
     )
 
-    tracking_date: Mapped[date] = mapped_column(
-        Date,
+    tracking_date: Mapped[datetime] = mapped_column(
+        DateTime,
         default=lambda: datetime.now(timezone.utc),
-        nullable=False,
         index=True,
     )
 
-    temperature = Column(Float, nullable=True)
-    humidity = Column(Float, nullable=True)
-    ph_level = Column(Float, nullable=True)
-    moisture = Column(Float, nullable=True)
-    notes = Column(Text, nullable=True)
+    temperature: Mapped[Optional[float]] = mapped_column(Float, nullable=True)
+    humidity: Mapped[Optional[float]] = mapped_column(Float, nullable=True)
+    ph_level: Mapped[Optional[float]] = mapped_column(Float, nullable=True)
+    moisture: Mapped[Optional[float]] = mapped_column(Float, nullable=True)
+    notes: Mapped[Optional[str]] = mapped_column(Text, nullable=True)
 
-    created_at = Column(
-        DateTime, default=lambda: datetime.now(timezone.utc), nullable=False
+    created_at: Mapped[datetime] = mapped_column(
+        DateTime, default=lambda: datetime.now(timezone.utc)
     )
-    updated_at = Column(
+    updated_at: Mapped[datetime] = mapped_column(
         DateTime,
         default=lambda: datetime.now(timezone.utc),
         onupdate=lambda: datetime.now(timezone.utc),
-        nullable=False,
     )
 
-    # Sets up a two-way relationship with the Batch model
-    batch = relationship("Batch", back_populates="trackings")
+    batch: Mapped["Batch"] = relationship("Batch", back_populates="trackings")
 
     # Database-level constraints to prevent invalid data from ever being saved
     __table_args__ = (
