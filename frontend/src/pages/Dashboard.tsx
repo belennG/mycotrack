@@ -1,18 +1,9 @@
 import { useNavigate } from 'react-router-dom'
-import {
-  Box,
-  Heading,
-  Text,
-  Button,
-  VStack,
-  HStack,
-  SimpleGrid,
-  Badge,
-  Flex,
-} from '@chakra-ui/react'
+import { Box, Heading, Text, VStack, HStack, SimpleGrid, Badge, Flex } from '@chakra-ui/react'
 import { useDashboard } from '../hooks/useBatches'
 import type { DashboardBatch } from '../types/batch'
 import BatchTrackingModal from '../components/BatchTrackingModal'
+import BatchDrawer from '../components/BatchDrawer'
 
 const STATUSES = ['ACTIVE', 'COMPLETED', 'FAILED', 'ARCHIVED'] as const
 
@@ -44,9 +35,8 @@ export default function Dashboard() {
         <Heading>Cultivation Dashboard</Heading>
         <HStack gap={4}>
           {totalBatches > 0 && <BatchTrackingModal activeBatches={data?.ACTIVE || []} />}
-          <Button colorPalette="teal" onClick={() => navigate('/batches/new')}>
-            + Create New Batch
-          </Button>
+
+          <BatchDrawer />
         </HStack>
       </Flex>
 
@@ -102,8 +92,11 @@ export default function Dashboard() {
                     </Text>
                     {batch.latest_tracking ? (
                       <HStack justify="space-between" fontSize="xs">
-                        <Text>🌡️ {batch.latest_tracking.temperature || '--'} °C</Text>
-                        <Text>💧 {batch.latest_tracking.humidity || '--'} %</Text>
+                        <Text color={'black'}>
+                          🌡️ {batch.latest_tracking.temperature || '--'} °C
+                        </Text>
+                        <Text color={'black'}>💧 {batch.latest_tracking.humidity || '--'} %</Text>
+                        <Text color={'black'}>🧪 {batch.latest_tracking.ph_level || '--'} </Text>
                       </HStack>
                     ) : (
                       <Text fontSize="xs" color="gray.400">
