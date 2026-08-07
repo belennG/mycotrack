@@ -70,7 +70,7 @@ export default function BatchTrackingModal({ activeBatches }: BatchTrackingModal
       })
 
       setIsOpen(false)
-      navigate(`/batches/${selectedBatchId}/trackings`)
+      navigate(`/batches/${selectedBatchId}`)
     } catch (error) {
       console.error('Failed to save tracking', error)
       alert('Failed to save tracking log.')

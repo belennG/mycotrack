@@ -11,8 +11,8 @@ export function useCreateTracking() {
       const { data } = await apiClient.post<Tracking>('/v1/trackings', newTracking)
       return data
     },
-    onSuccess: () => {
-      // This tells React Query to immediately refresh your Trackings table!
+    onSuccess: async () => {
+      await queryClient.refetchQueries({ queryKey: ['dashboard'] })
       queryClient.invalidateQueries({ queryKey: ['trackings'] })
       appToast.success('Tracking Created', 'Tracking for batch has been saved.')
     },

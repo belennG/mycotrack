@@ -1,6 +1,6 @@
 from fastapi import APIRouter, Depends, HTTPException, status
 from sqlalchemy.orm import Session
-from datetime import date
+from datetime import date, datetime, timezone
 from typing import Optional
 from uuid import UUID
 from database import get_db
@@ -38,7 +38,9 @@ def list_trackings(
         query = query.filter(Tracking.tracking_date <= date_to)
 
     total = query.count()
-    trackings = query.offset(skip).limit(limit).all()
+    trackings = (
+        query.order_by(Tracking.created_at.desc()).offset(skip).limit(limit).all()
+    )
 
     return {"total": total, "items": trackings}
 
@@ -59,16 +61,18 @@ def get_trackings(tracking_id: UUID, db: Session = Depends(get_db)):
 @router.post("/", response_model=TrackingResponse, status_code=status.HTTP_201_CREATED)
 def create_trackings(tracking_data: TrackingCreate, db: Session = Depends(get_db)):
     """Create a new tracking entry."""
-    # 1. Validate that the associated batch actually exists
     batch = db.query(Batch).filter(Batch.id == tracking_data.batch_id).first()
     if not batch:
         raise HTTPException(
             status_code=status.HTTP_404_NOT_FOUND, detail="Associated Batch not found"
         )
 
-    # 2. Create the tracking
     new_tracking = Tracking(**tracking_data.model_dump())
     db.add(new_tracking)
+
+    batch.updated_at = datetime.now(timezone.utc)  # type: ignore[assignment]
+    # @TODO change to mapped_column
+
     db.commit()
     db.refresh(new_tracking)
     return new_tracking
