@@ -12,6 +12,7 @@ import {
 } from '@chakra-ui/react'
 import { useDashboard } from '../hooks/useBatches'
 import type { DashboardBatch } from '../types/batch'
+import BatchTrackingModal from '../components/BatchTrackingModal'
 
 const STATUSES = ['ACTIVE', 'COMPLETED', 'FAILED', 'ARCHIVED'] as const
 
@@ -42,14 +43,7 @@ export default function Dashboard() {
       <Flex justify="space-between" align="center" mb={8} wrap="wrap" gap={4}>
         <Heading>Cultivation Dashboard</Heading>
         <HStack gap={4}>
-          {totalBatches > 0 && (
-            <Button
-              variant="outline"
-              onClick={() => alert('Implement global tracking modal with batch selector here')}
-            >
-              + Create New Tracking
-            </Button>
-          )}
+          {totalBatches > 0 && <BatchTrackingModal activeBatches={data?.ACTIVE || []} />}
           <Button colorPalette="teal" onClick={() => navigate('/batches/new')}>
             + Create New Batch
           </Button>
