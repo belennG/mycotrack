@@ -26,7 +26,7 @@ class Tracking(BaseModel):
 
     tracking_date: Mapped[date] = mapped_column(
         Date,
-        default=lambda: datetime.now(timezone.utc).date(),
+        default=lambda: datetime.now(timezone.utc),
         nullable=False,
         index=True,
     )

@@ -1,6 +1,6 @@
 from pydantic import BaseModel, Field, ConfigDict
 from typing import Optional, List
-from datetime import date, datetime
+from datetime import datetime
 from uuid import UUID
 
 
@@ -24,15 +24,16 @@ class TrackingCreate(TrackingBase):
     """Schema for POST requests."""
 
     batch_id: UUID = Field(..., description="ID of the associated crop batch")
-    log_date: date = Field(
-        default_factory=date.today, description="The date of the log entry"
+    # @TODO update to tracking_datetime and update db
+    tracking_date: datetime = Field(
+        default_factory=datetime.now, description="The date of the log entry"
     )
 
 
 class TrackingUpdate(TrackingBase):
     """Schema for PUT/PATCH requests (all fields optional)."""
 
-    log_date: Optional[date] = None
+    tracking_date: Optional[datetime] = None
 
 
 class TrackingResponse(TrackingBase):
@@ -40,7 +41,7 @@ class TrackingResponse(TrackingBase):
 
     id: UUID
     batch_id: UUID
-    log_date: date
+    tracking_date: datetime
     created_at: datetime
     updated_at: datetime
 
@@ -64,7 +65,7 @@ from models.tracking import Tracking
 # Creating a new Tracking instance in code:
 new_tracking = Tracking(
     batch_id="550e8400-e29b-41d4-a716-446655440000", # Must be a valid UUID from an existing Batch
-    log_date=date(2026, 8, 1),
+    tracking_date=datetime(2026, 8, 1, 14, 30),
     temperature=24.5,
     humidity=85.0,
     ph_level=6.5,
