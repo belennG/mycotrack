@@ -1,10 +1,10 @@
 from pydantic import BaseModel, Field, ConfigDict
 from typing import Optional, List
-from datetime import date, datetime
+from datetime import datetime
 from uuid import UUID
 
 
-class DailyLogBase(BaseModel):
+class TrackingBase(BaseModel):
     """Base schema with common fields and strict validation ranges."""
 
     temperature: Optional[float] = Field(None, description="Temperature reading")
@@ -20,38 +20,39 @@ class DailyLogBase(BaseModel):
     notes: Optional[str] = Field(None, description="Observation notes")
 
 
-class DailyLogCreate(DailyLogBase):
+class TrackingCreate(TrackingBase):
     """Schema for POST requests."""
 
     batch_id: UUID = Field(..., description="ID of the associated crop batch")
-    log_date: date = Field(
-        default_factory=date.today, description="The date of the log entry"
+    # @TODO update to tracking_datetime and update db
+    tracking_date: datetime = Field(
+        default_factory=datetime.now, description="The date of the log entry"
     )
 
 
-class DailyLogUpdate(DailyLogBase):
+class TrackingUpdate(TrackingBase):
     """Schema for PUT/PATCH requests (all fields optional)."""
 
-    log_date: Optional[date] = None
+    tracking_date: Optional[datetime] = None
 
 
-class DailyLogResponse(DailyLogBase):
+class TrackingResponse(TrackingBase):
     """Schema for API responses."""
 
     id: UUID
     batch_id: UUID
-    log_date: date
+    tracking_date: datetime
     created_at: datetime
     updated_at: datetime
 
     model_config = ConfigDict(from_attributes=True)
 
 
-class DailyLogListResponse(BaseModel):
+class TrackingListResponse(BaseModel):
     """Schema for paginated list responses."""
 
     total: int
-    items: List[DailyLogResponse]
+    items: List[TrackingResponse]
 
 
 """
@@ -59,12 +60,12 @@ class DailyLogListResponse(BaseModel):
 MODEL USAGE EXAMPLE:
 =============================================================================
 from datetime import date
-from models.daily_log import DailyLog
+from models.tracking import Tracking
 
-# Creating a new DailyLog instance in code:
-new_log = DailyLog(
+# Creating a new Tracking instance in code:
+new_tracking = Tracking(
     batch_id="550e8400-e29b-41d4-a716-446655440000", # Must be a valid UUID from an existing Batch
-    log_date=date(2026, 8, 1),
+    tracking_date=datetime(2026, 8, 1, 14, 30),
     temperature=24.5,
     humidity=85.0,
     ph_level=6.5,

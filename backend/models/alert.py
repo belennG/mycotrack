@@ -1,6 +1,9 @@
-from sqlalchemy import Column, String, Text, DateTime, Boolean, ForeignKey
-from sqlalchemy.dialects.postgresql import UUID
-from sqlalchemy.orm import relationship
+import uuid
+from typing import Optional
+from models.batch import Batch
+from sqlalchemy import String, Text, DateTime, Boolean, ForeignKey
+from sqlalchemy.dialects.postgresql import UUID as PG_UUID
+from sqlalchemy.orm import Mapped, mapped_column, relationship
 from datetime import datetime, timezone
 from models.base import BaseModel
 
@@ -10,21 +13,21 @@ class Alert(BaseModel):
 
     __tablename__ = "alerts"
 
-    batch_id = Column(
-        UUID(as_uuid=True),
+    batch_id: Mapped[uuid.UUID] = mapped_column(
+        PG_UUID(as_uuid=True),
         ForeignKey("batches.id", ondelete="CASCADE"),
-        nullable=False,
         index=True,
     )
-    alert_type = Column(String, nullable=False, index=True)
-    severity = Column(String, nullable=False)  # e.g., 'warning', 'critical'
-    message = Column(Text, nullable=False)
 
-    # State tracking for the farmer's dashboard
-    is_acknowledged = Column(Boolean, default=False, nullable=False)
-    acknowledged_at = Column(DateTime, nullable=True)
-    created_at = Column(
-        DateTime, default=lambda: datetime.now(timezone.utc), nullable=False
+    alert_type: Mapped[str] = mapped_column(String, index=True)
+    severity: Mapped[str] = mapped_column(String)
+    message: Mapped[str] = mapped_column(Text)
+
+    is_acknowledged: Mapped[bool] = mapped_column(Boolean, default=False)
+    acknowledged_at: Mapped[Optional[datetime]] = mapped_column(DateTime, nullable=True)
+
+    created_at: Mapped[datetime] = mapped_column(
+        DateTime, default=lambda: datetime.now(timezone.utc)
     )
 
-    batch = relationship("Batch")
+    batch: Mapped["Batch"] = relationship("Batch")

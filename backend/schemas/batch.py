@@ -2,6 +2,8 @@ from datetime import datetime, timezone
 from typing import Optional, List
 from pydantic import BaseModel, Field, ConfigDict
 from models.batch import BatchStatus
+from uuid import UUID
+from schemas.tracking import TrackingResponse
 
 
 class BatchBase(BaseModel):
@@ -45,11 +47,14 @@ class BatchUpdate(BaseModel):
 class BatchResponse(BatchBase):
     """Schema for returning a single batch in API responses."""
 
-    id: str  # Will map from UUID
+    id: UUID  # Will map from UUID
+    batch_name: str
+    crop_type: str
+    status: BatchStatus
     start_date: datetime
-    actual_harvest_date: Optional[datetime] = None
-    created_at: datetime
-    updated_at: datetime
+    expected_harvest_date: datetime
+    location: str
+    notes: str | None = None
 
     # This tells Pydantic to read data even if it's coming from a SQLAlchemy object (orm mode)
     model_config = ConfigDict(from_attributes=True)
@@ -60,3 +65,14 @@ class BatchListResponse(BaseModel):
 
     total: int
     items: List[BatchResponse]
+
+
+class DashboardBatch(BatchResponse):
+    latest_tracking: TrackingResponse | None = None
+
+
+class DashboardResponse(BaseModel):
+    ACTIVE: List[DashboardBatch] = []
+    COMPLETED: List[DashboardBatch] = []
+    FAILED: List[DashboardBatch] = []
+    ARCHIVED: List[DashboardBatch] = []

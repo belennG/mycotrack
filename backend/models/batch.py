@@ -1,8 +1,12 @@
 import enum
+from typing import List, Optional, TYPE_CHECKING
 from datetime import datetime, timezone
-from sqlalchemy import Column, String, DateTime, Text, Enum as SQLEnum
+from sqlalchemy import String, DateTime, Text, Enum as SQLEnum
+from sqlalchemy.orm import Mapped, mapped_column, relationship
 from models.base import BaseModel
-from sqlalchemy.orm import relationship
+
+if TYPE_CHECKING:
+    from models.tracking import Tracking
 
 
 class BatchStatus(str, enum.Enum):
@@ -15,39 +19,43 @@ class BatchStatus(str, enum.Enum):
 
 
 class Batch(BaseModel):
-    """
-    SQLAlchemy model representing a crop batch (e.g., mushroom cultivation cycle).
-    Inherits UUID primary key from BaseModel.
-    """
-
     __tablename__ = "batches"
 
-    batch_name = Column(String(100), unique=True, index=True, nullable=False)
-    crop_type = Column(String(100), nullable=False)
+    batch_name: Mapped[str] = mapped_column(String(100), unique=True, index=True)
+    crop_type: Mapped[str] = mapped_column(String(100))
 
-    # Status uses the Python Enum mapped to a database string/enum
-    status: str = Column(  # type: ignore
-        SQLEnum(BatchStatus), default=BatchStatus.ACTIVE, nullable=False
+    status: Mapped[BatchStatus] = mapped_column(
+        SQLEnum(BatchStatus), default=BatchStatus.ACTIVE
     )
 
-    start_date = Column(
-        DateTime, default=lambda: datetime.now(timezone.utc), nullable=False
+    start_date: Mapped[datetime] = mapped_column(
+        DateTime, default=lambda: datetime.now(timezone.utc)
     )
-    expected_harvest_date = Column(DateTime, nullable=False)
-    actual_harvest_date = Column(DateTime, nullable=True)
+    expected_harvest_date: Mapped[datetime] = mapped_column(DateTime)
 
-    location = Column(String(150), nullable=False)
-    notes = Column(Text, nullable=True)
-
-    created_at = Column(
-        DateTime, default=lambda: datetime.now(timezone.utc), nullable=False
-    )
-    updated_at = Column(
-        DateTime, default=lambda: datetime.now(timezone.utc), nullable=False
+    # Use Optional for nullable fields
+    actual_harvest_date: Mapped[Optional[datetime]] = mapped_column(
+        DateTime, nullable=True
     )
 
-    daily_logs = relationship(
-        "DailyLog", back_populates="batch", cascade="all, delete-orphan"
+    location: Mapped[str] = mapped_column(String(150))
+    notes: Mapped[Optional[str]] = mapped_column(Text, nullable=True)
+
+    created_at: Mapped[datetime] = mapped_column(
+        DateTime, default=lambda: datetime.now(timezone.utc)
+    )
+    updated_at: Mapped[datetime] = mapped_column(
+        DateTime,
+        default=lambda: datetime.now(timezone.utc),
+        onupdate=lambda: datetime.now(timezone.utc),
+    )
+
+    # string "Tracking" to prevent circular import issues
+    trackings: Mapped[List["Tracking"]] = relationship(
+        "Tracking",
+        back_populates="batch",
+        cascade="all, delete-orphan",
+        order_by="desc(Tracking.created_at)",
     )
 
 

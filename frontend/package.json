@@ -9,18 +9,21 @@
     "lint": "oxlint",
     "preview": "vite preview",
     "test": "vitest run",
-    "prepare": "husky || true"
+    "prepare": "husky || true",
+    "format": "prettier --write \"src/**/*.{js,jsx,ts,tsx,css,md}\""
   },
   "dependencies": {
     "@chakra-ui/react": "^3.36.1",
     "@emotion/react": "^11.14.0",
     "@emotion/styled": "^11.14.1",
     "@hookform/resolvers": "^5.7.1",
+    "@sentry/react": "^10.69.0",
     "@tanstack/react-query": "^5.101.4",
     "axios": "^1.19.0",
     "framer-motion": "^12.43.0",
     "react": "^19.2.8",
     "react-dom": "^19.2.8",
+    "react-error-boundary": "^6.1.2",
     "react-hook-form": "^7.84.0",
     "react-router-dom": "^6.30.4",
     "zod": "^4.4.3"
@@ -32,6 +35,7 @@
     "@vitejs/plugin-react": "^6.0.4",
     "husky": "^9.1.7",
     "oxlint": "^1.77.0",
+    "prettier": "^3.9.6",
     "typescript": "~6.0.2",
     "vite": "^8.2.0",
     "vitest": "^4.1.10"
