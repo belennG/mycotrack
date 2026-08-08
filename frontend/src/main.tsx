@@ -8,10 +8,14 @@ import { system } from './theme.ts'
 import { Toaster } from './components/ui/toaster'
 import { ErrorBoundary } from 'react-error-boundary'
 import { GlobalErrorBoundary } from './components/GlobalErrorBoundary'
+import * as Sentry from '@sentry/react'
 
-window.addEventListener('unhandledrejection', (event) => {
-  console.error('Unhandled Promise Rejection:', event.reason)
-  // @TODO Send to Sentry here
+Sentry.init({
+  dsn: import.meta.env.VITE_SENTRY_DSN,
+  dataCollection: {
+    userInfo: false,
+    httpBodies: [],
+  },
 })
 
 const queryClient = new QueryClient({

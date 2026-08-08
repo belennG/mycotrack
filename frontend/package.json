@@ -17,6 +17,7 @@
     "@emotion/react": "^11.14.0",
     "@emotion/styled": "^11.14.1",
     "@hookform/resolvers": "^5.7.1",
+    "@sentry/react": "^10.69.0",
     "@tanstack/react-query": "^5.101.4",
     "axios": "^1.19.0",
     "framer-motion": "^12.43.0",
