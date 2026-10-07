@@ -1,0 +1,76 @@
+name: Frontend Deploy
+
+# Builds the SPA and publishes it to S3. AWS access uses GitHub OIDC (a short-lived
+# role assumption) — there are no long-lived AWS keys in this repo's secrets.
+# Required repository variables: AWS_REGION, AWS_DEPLOY_ROLE_ARN, FRONTEND_BUCKET.
+# Optional build-time variables: VITE_API_BASE_URL, VITE_SENTRY_DSN,
+# VITE_AUTH0_DOMAIN, VITE_AUTH0_CLIENT_ID, VITE_AUTH0_AUDIENCE.
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - "frontend/**"
+      - ".github/workflows/frontend-deploy.yml"
+  workflow_dispatch:
+
+# Never run two deploys at once, and never cancel one mid-upload.
+concurrency:
+  group: frontend-deploy
+  cancel-in-progress: false
+
+permissions:
+  id-token: write # request the OIDC token
+  contents: read
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+
+    defaults:
+      run:
+        working-directory: ./frontend
+
+    steps:
+      - name: Checkout Code
+        uses: actions/checkout@v4
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: "22"
+          cache: "npm"
+          cache-dependency-path: frontend/package-lock.json
+
+      - name: Install Dependencies
+        run: npm ci
+
+      - name: Build
+        run: npm run build
+        env:
+          VITE_API_BASE_URL: ${{ vars.VITE_API_BASE_URL }}
+          VITE_SENTRY_DSN: ${{ vars.VITE_SENTRY_DSN }}
+          VITE_AUTH0_DOMAIN: ${{ vars.VITE_AUTH0_DOMAIN }}
+          VITE_AUTH0_CLIENT_ID: ${{ vars.VITE_AUTH0_CLIENT_ID }}
+          VITE_AUTH0_AUDIENCE: ${{ vars.VITE_AUTH0_AUDIENCE }}
+
+      - name: Configure AWS credentials (OIDC)
+        uses: aws-actions/configure-aws-credentials@v4
+        with:
+          role-to-assume: ${{ vars.AWS_DEPLOY_ROLE_ARN }}
+          aws-region: ${{ vars.AWS_REGION }}
+
+      # Hashed assets never change for a given filename: cache for a year.
+      - name: Upload hashed assets
+        run: |
+          aws s3 sync dist/assets "s3://${{ vars.FRONTEND_BUCKET }}/assets" \
+            --delete \
+            --cache-control "public,max-age=31536000,immutable"
+
+      # Everything else (index.html, icons) must revalidate so a deploy shows up immediately.
+      - name: Upload app shell
+        run: |
+          aws s3 sync dist "s3://${{ vars.FRONTEND_BUCKET }}" \
+            --exclude "assets/*" \
+            --delete \
+            --cache-control "no-cache"

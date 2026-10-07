@@ -3,6 +3,7 @@ from sqlalchemy.orm import Session
 from datetime import date, datetime, timezone
 from typing import Optional
 from uuid import UUID
+from auth import get_current_user
 from database import get_db
 from models.tracking import Tracking
 from models.batch import Batch
@@ -13,7 +14,11 @@ from schemas.tracking import (
     TrackingListResponse,
 )
 
-router = APIRouter(prefix="/api/v1/trackings", tags=["Trackings"])
+router = APIRouter(
+    prefix="/api/v1/trackings",
+    tags=["Trackings"],
+    dependencies=[Depends(get_current_user)],
+)
 
 
 @router.get("/", response_model=TrackingListResponse, status_code=status.HTTP_200_OK)
