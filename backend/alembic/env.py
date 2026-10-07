@@ -9,6 +9,7 @@ from database import Base, SQLALCHEMY_DATABASE_URL
 from models.batch import Batch  # noqa
 from models.tracking import Tracking  # noqa
 from models.alert import Alert  # noqa
+from models.user import User  # noqa
 
 # this is the Alembic Config object, which provides
 # access to the values within the .ini file in use.

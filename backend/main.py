@@ -3,7 +3,7 @@ import sentry_sdk
 import os
 from fastapi import FastAPI
 from middleware.cors import setup_cors
-from routers import analytics, alerts, batches, trackings
+from routers import analytics, alerts, batches, trackings, users
 
 load_dotenv()
 
@@ -26,7 +26,9 @@ app = FastAPI(
 # 1. Apply CORS middleware
 setup_cors(app)
 
-# 2. Include the trackings router
+# 2. Include the routers. Every /api/v1 router except this one requires a valid
+#    Auth0 access token (see auth.get_current_user).
+app.include_router(users.router)
 app.include_router(trackings.router)
 app.include_router(analytics.router)
 app.include_router(alerts.router)
