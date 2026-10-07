@@ -8,6 +8,7 @@ import { system } from './theme.ts'
 import { Toaster } from './components/ui/toaster'
 import { ErrorBoundary } from 'react-error-boundary'
 import { GlobalErrorBoundary } from './components/GlobalErrorBoundary'
+import { Auth0ProviderWithNavigate } from './auth/Auth0ProviderWithNavigate'
 import * as Sentry from '@sentry/react'
 
 Sentry.init({
@@ -37,8 +38,10 @@ ReactDOM.createRoot(document.getElementById('root')!).render(
       >
         <QueryClientProvider client={queryClient}>
           <BrowserRouter>
-            <App />
-            <Toaster />
+            <Auth0ProviderWithNavigate>
+              <App />
+              <Toaster />
+            </Auth0ProviderWithNavigate>
           </BrowserRouter>
         </QueryClientProvider>
       </ErrorBoundary>

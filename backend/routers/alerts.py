@@ -4,11 +4,16 @@ from typing import Optional, List
 from datetime import datetime, timezone
 from uuid import UUID
 
+from auth import get_current_user
 from database import get_db
 from models.alert import Alert
 from schemas.alert import AlertResponse, AlertListResponse
 
-router = APIRouter(prefix="/api/v1/alerts", tags=["Alerts"])
+router = APIRouter(
+    prefix="/api/v1/alerts",
+    tags=["Alerts"],
+    dependencies=[Depends(get_current_user)],
+)
 
 
 @router.get("/", response_model=AlertListResponse)

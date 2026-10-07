@@ -1,6 +1,27 @@
 import { useState, useEffect } from 'react'
-import { Flex, Button, Heading, HStack } from '@chakra-ui/react'
+import { Flex, Button, Heading, HStack, Text, Image } from '@chakra-ui/react'
 import { NavLink } from 'react-router-dom'
+import { useAppAuth } from '../auth/AppAuthContext'
+
+function AuthControls() {
+  const { status, mode, user, logout } = useAppAuth()
+
+  if (status !== 'authenticated') return null
+
+  return (
+    <HStack gap={3}>
+      {user?.picture ? (
+        <Image src={user.picture} alt={user.name ?? 'User avatar'} boxSize="8" rounded="full" />
+      ) : null}
+      <Text fontSize="sm" display={{ base: 'none', md: 'block' }}>
+        {user?.name ?? user?.email}
+      </Text>
+      <Button size="sm" variant="outline" onClick={logout}>
+        {mode === 'demo' ? 'Exit demo' : 'Log out'}
+      </Button>
+    </HStack>
+  )
+}
 
 export default function Header() {
   const [isDark, setIsDark] = useState(false)
@@ -59,9 +80,12 @@ export default function Header() {
         </NavLink>
       </HStack>
 
-      <Button onClick={toggleTheme} variant="outline" size="sm">
-        {isDark ? '☀️ Light' : '🌙 Dark'}
-      </Button>
+      <HStack gap={3}>
+        <AuthControls />
+        <Button onClick={toggleTheme} variant="outline" size="sm">
+          {isDark ? '☀️ Light' : '🌙 Dark'}
+        </Button>
+      </HStack>
     </Flex>
   )
 }

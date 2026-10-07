@@ -4,6 +4,7 @@ from datetime import date
 from typing import Optional
 from uuid import UUID
 
+from auth import get_current_user
 from database import get_db
 from models.tracking import Tracking
 from models.batch import Batch
@@ -15,7 +16,11 @@ from services.analytics import (
 from services.alerts import generate_alerts
 from schemas.alert import AnalyticsResponse, BatchSummaryResponse
 
-router = APIRouter(prefix="/api/v1/analytics", tags=["Analytics"])
+router = APIRouter(
+    prefix="/api/v1/analytics",
+    tags=["Analytics"],
+    dependencies=[Depends(get_current_user)],
+)
 
 
 @router.get("/batch/{batch_id}", response_model=AnalyticsResponse)

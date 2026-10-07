@@ -13,10 +13,15 @@ from schemas.batch import (
     DashboardResponse,
     DashboardBatch,
 )
+from auth import get_current_user
 from database import get_db
 from schemas.tracking import TrackingResponse
 
-router = APIRouter(prefix="/api/v1/batches", tags=["Batches"])
+router = APIRouter(
+    prefix="/api/v1/batches",
+    tags=["Batches"],
+    dependencies=[Depends(get_current_user)],
+)
 
 
 @router.get("/dashboard", response_model=DashboardResponse)
