@@ -35,11 +35,11 @@ jobs:
     steps:
     # Download code into the cloud server
     - name: Checkout Code
-      uses: actions/checkout@v4
+      uses: actions/checkout@v7
 
     # Install the specific Python version
     - name: Set up Python ${{ matrix.python-version }}
-      uses: actions/setup-python@v5
+      uses: actions/setup-python@v7
       with:
         python-version: ${{ matrix.python-version }}
         cache: 'pip' # Speeds up future runs
