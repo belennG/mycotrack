@@ -1,10 +1,14 @@
 import { useState, useEffect } from 'react'
-import { Flex, Button, Heading, HStack, Text, Image } from '@chakra-ui/react'
+import { Box, Flex, Button, Heading, HStack, Text, Image } from '@chakra-ui/react'
 import { NavLink } from 'react-router-dom'
 import { useAppAuth } from '../auth/AppAuthContext'
+import { useMe } from '../hooks/useMe'
+
+const roleLabel = (role: string) => role.charAt(0) + role.slice(1).toLowerCase()
 
 function AuthControls() {
   const { status, mode, user, logout } = useAppAuth()
+  const { data: me } = useMe()
 
   if (status !== 'authenticated') return null
 
@@ -13,9 +17,14 @@ function AuthControls() {
       {user?.picture ? (
         <Image src={user.picture} alt={user.name ?? 'User avatar'} boxSize="8" rounded="full" />
       ) : null}
-      <Text fontSize="sm" display={{ base: 'none', md: 'block' }}>
-        {user?.name ?? user?.email}
-      </Text>
+      <Box display={{ base: 'none', md: 'block' }} lineHeight="short">
+        <Text fontSize="sm">{user?.name ?? user?.email}</Text>
+        {me ? (
+          <Text fontSize="xs" color="gray.500" data-testid="organization">
+            {me.organization.name} · {roleLabel(me.organization.role)}
+          </Text>
+        ) : null}
+      </Box>
       <Button size="sm" variant="outline" onClick={logout}>
         {mode === 'demo' ? 'Exit demo' : 'Log out'}
       </Button>
