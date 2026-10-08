@@ -16,3 +16,19 @@ class UserResponse(BaseModel):
     picture: Optional[str] = Field(None, description="Avatar URL")
     created_at: datetime
     last_login_at: Optional[datetime] = None
+
+
+class OrganizationSummary(BaseModel):
+    """An organization the user belongs to, with their role in it."""
+
+    id: UUID
+    name: str
+    slug: str
+    role: str
+
+
+class MeResponse(UserResponse):
+    """The profile plus the organization the request acts on."""
+
+    organization: OrganizationSummary
+    organizations: list[OrganizationSummary]

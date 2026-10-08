@@ -5,12 +5,14 @@ from typing import Optional
 
 from fastapi import Depends, HTTPException, status
 from fastapi.security import HTTPAuthorizationCredentials, HTTPBearer
+from sqlalchemy.exc import IntegrityError
 from sqlalchemy.orm import Session
 
 from auth.config import settings
 from auth.verify import TokenError, verify_token
 from database import get_db
 from models.user import User
+from services.organizations import create_personal_org
 
 # ``auto_error=False`` so a missing/!bearer header reaches our code and returns a
 # consistent 401 (FastAPI's built-in would raise 403). Still detected as a
@@ -52,6 +54,18 @@ def _provision_user(db: Session, claims: dict) -> User:
             last_login_at=now,
         )
         db.add(user)
+        try:
+            db.flush()
+            # The user and their personal organization are created in one transaction.
+            create_personal_org(db, user)
+            db.commit()
+        except IntegrityError:
+            # Two first requests for the same new user raced; the other one won and its
+            # whole transaction (user + organization) is intact. Use that row.
+            db.rollback()
+            user = db.query(User).filter(User.auth0_sub == sub).first()
+            if user is None:
+                raise
     else:
         if email and user.email != email:
             user.email = email
@@ -60,8 +74,8 @@ def _provision_user(db: Session, claims: dict) -> User:
         if picture and user.picture != picture:
             user.picture = picture
         user.last_login_at = now
+        db.commit()
 
-    db.commit()
     db.refresh(user)
     return user
 
