@@ -6,6 +6,12 @@ introducing pydantic-settings for a handful of values.
 
 import os
 
+from dotenv import load_dotenv
+
+# main.py imports the routers (and therefore this module) before it calls load_dotenv(), so
+# load the .env file here, like database.py does, or AUTH0_* would be read as empty.
+load_dotenv()
+
 
 class AuthSettings:
     """Resolved Auth0 settings for token validation."""

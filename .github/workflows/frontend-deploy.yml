@@ -3,6 +3,7 @@ name: Frontend Deploy
 # Builds the SPA and publishes it to S3. AWS access uses GitHub OIDC (a short-lived
 # role assumption) — there are no long-lived AWS keys in this repo's secrets.
 # Required repository variables: AWS_REGION, AWS_DEPLOY_ROLE_ARN, FRONTEND_BUCKET.
+# Optional: CLOUDFRONT_DISTRIBUTION_ID (invalidates index.html after each deploy).
 # Optional build-time variables: VITE_API_BASE_URL, VITE_SENTRY_DSN,
 # VITE_AUTH0_DOMAIN, VITE_AUTH0_CLIENT_ID, VITE_AUTH0_AUDIENCE.
 
@@ -33,10 +34,10 @@ jobs:
 
     steps:
       - name: Checkout Code
-        uses: actions/checkout@v4
+        uses: actions/checkout@v7
 
       - name: Set up Node.js
-        uses: actions/setup-node@v4
+        uses: actions/setup-node@v7
         with:
           node-version: "22"
           cache: "npm"
@@ -55,7 +56,7 @@ jobs:
           VITE_AUTH0_AUDIENCE: ${{ vars.VITE_AUTH0_AUDIENCE }}
 
       - name: Configure AWS credentials (OIDC)
-        uses: aws-actions/configure-aws-credentials@v4
+        uses: aws-actions/configure-aws-credentials@v6
         with:
           role-to-assume: ${{ vars.AWS_DEPLOY_ROLE_ARN }}
           aws-region: ${{ vars.AWS_REGION }}
@@ -74,3 +75,12 @@ jobs:
             --exclude "assets/*" \
             --delete \
             --cache-control "no-cache"
+
+      # index.html is the only cached object that changes at a stable URL (assets are
+      # content-hashed), so that is all that needs invalidating.
+      - name: Invalidate CloudFront
+        if: ${{ vars.CLOUDFRONT_DISTRIBUTION_ID != '' }}
+        run: |
+          aws cloudfront create-invalidation \
+            --distribution-id "${{ vars.CLOUDFRONT_DISTRIBUTION_ID }}" \
+            --paths "/index.html"
