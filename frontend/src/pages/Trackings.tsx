@@ -47,6 +47,11 @@ const trackingSchema = z.object({
 
 type TrackingFormValues = z.infer<typeof trackingSchema>
 
+/** Date and time of the reading, in the viewer's locale. */
+function formatReadingTime(value: string) {
+  return new Date(value).toLocaleString(undefined, { dateStyle: 'medium', timeStyle: 'short' })
+}
+
 export default function Trackings() {
   const { id } = useParams<{ id: string }>()
   const [page, setPage] = useState(1)
@@ -246,9 +251,7 @@ export default function Trackings() {
               data.items.map((item) => (
                 <Box key={item.id} p={4} borderWidth="1px" borderRadius="md" shadow="sm">
                   <Flex justify="space-between" align="center" mb={2}>
-                    <Heading size="sm">
-                      Log Date: {new Date(item.tracking_date).toLocaleDateString()}
-                    </Heading>
+                    <Heading size="sm">Reading: {formatReadingTime(item.tracking_date)}</Heading>
                     <Text fontSize="xs" color="gray.500">
                       Added: {new Date(item.created_at).toLocaleTimeString()}
                     </Text>
