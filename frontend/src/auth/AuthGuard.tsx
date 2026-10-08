@@ -1,5 +1,6 @@
 import { Navigate, Outlet, useLocation } from 'react-router-dom'
 import { FullPageSpinner } from '../components/FullPageSpinner'
+import { AuthErrorScreen } from './AuthErrorScreen'
 import { useAppAuth } from './AppAuthContext'
 
 /**
@@ -11,7 +12,7 @@ export function AuthGuard() {
   const location = useLocation()
 
   if (error) {
-    return <FullPageSpinner label={`Authentication error: ${error.message}`} />
+    return <AuthErrorScreen title="Authentication error" message={error.message} />
   }
 
   if (status === 'loading') {

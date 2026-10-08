@@ -1,4 +1,5 @@
 import { useAppAuth } from '../auth/AppAuthContext'
+import { AuthErrorScreen } from '../auth/AuthErrorScreen'
 import { FullPageSpinner } from '../components/FullPageSpinner'
 
 /**
@@ -10,7 +11,7 @@ export default function Callback() {
   const { error } = useAppAuth()
 
   if (error) {
-    return <FullPageSpinner label={`Sign-in failed: ${error.message}`} />
+    return <AuthErrorScreen title="Sign-in failed" message={error.message} />
   }
 
   return <FullPageSpinner label="Signing you in…" />

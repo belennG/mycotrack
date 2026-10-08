@@ -93,10 +93,10 @@ export default function Dashboard() {
                     {batch.latest_tracking ? (
                       <HStack justify="space-between" fontSize="xs">
                         <Text color={'black'}>
-                          🌡️ {batch.latest_tracking.temperature || '--'} °C
+                          🌡️ {batch.latest_tracking.temperature ?? '--'} °C
                         </Text>
-                        <Text color={'black'}>💧 {batch.latest_tracking.humidity || '--'} %</Text>
-                        <Text color={'black'}>🧪 {batch.latest_tracking.ph_level || '--'} </Text>
+                        <Text color={'black'}>💧 {batch.latest_tracking.humidity ?? '--'} %</Text>
+                        <Text color={'black'}>🧪 {batch.latest_tracking.ph_level ?? '--'} </Text>
                       </HStack>
                     ) : (
                       <Text fontSize="xs" color="gray.400">
