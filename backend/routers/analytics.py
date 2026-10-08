@@ -4,7 +4,7 @@ from datetime import date
 from typing import Optional
 from uuid import UUID
 
-from auth import get_current_user
+from auth.tenancy import OrgContext, read_access
 from database import get_db
 from models.tracking import Tracking
 from models.batch import Batch
@@ -19,7 +19,7 @@ from schemas.alert import AnalyticsResponse, BatchSummaryResponse
 router = APIRouter(
     prefix="/api/v1/analytics",
     tags=["Analytics"],
-    dependencies=[Depends(get_current_user)],
+    dependencies=[Depends(read_access)],
 )
 
 
@@ -31,6 +31,7 @@ def get_batch_analytics(
     metric_type: Optional[str] = Query(
         None, description="Filter by specific metric (e.g., temperature)"
     ),
+    ctx: OrgContext = Depends(read_access),
     db: Session = Depends(get_db),
 ):
     """
@@ -40,7 +41,11 @@ def get_batch_analytics(
     Returns a completeness_score (0-100%) indicating how many expected sensor readings were recorded
     """
     # 1. Verify batch exists
-    batch = db.query(Batch).filter(Batch.id == batch_id).first()
+    batch = (
+        db.query(Batch)
+        .filter(Batch.id == batch_id, Batch.organization_id == ctx.organization.id)
+        .first()
+    )
     if not batch:
         raise HTTPException(
             status_code=status.HTTP_404_NOT_FOUND, detail="Batch not found"
@@ -94,7 +99,11 @@ def get_batch_analytics(
 
 
 @router.get("/batch/{batch_id}/summary", response_model=BatchSummaryResponse)
-def get_batch_summary(batch_id: UUID, db: Session = Depends(get_db)):
+def get_batch_summary(
+    batch_id: UUID,
+    ctx: OrgContext = Depends(read_access),
+    db: Session = Depends(get_db),
+):
     """
     Get overall health status, key metrics, and active alerts count for a batch.
 
@@ -107,7 +116,11 @@ def get_batch_summary(batch_id: UUID, db: Session = Depends(get_db)):
 
     If data is missing entirely for a day, a `missing_data` warning is generated.
     """
-    batch = db.query(Batch).filter(Batch.id == batch_id).first()
+    batch = (
+        db.query(Batch)
+        .filter(Batch.id == batch_id, Batch.organization_id == ctx.organization.id)
+        .first()
+    )
     if not batch:
         raise HTTPException(
             status_code=status.HTTP_404_NOT_FOUND, detail="Batch not found"

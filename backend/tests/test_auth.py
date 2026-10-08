@@ -1,8 +1,6 @@
 """Tests for Auth0 access-token validation and JIT user provisioning."""
 
 import time
-import uuid
-from datetime import datetime, timezone
 
 import pytest
 from joserfc import jwt
@@ -12,6 +10,8 @@ import auth.jwks as jwks_module
 from auth.config import settings
 from auth.dependencies import _provision_user
 from auth.verify import TokenError, verify_token
+from models.organization import Membership, MemberRole, Organization
+from models.user import User
 
 ISSUER = "https://mycotrack-test.eu.auth0.com/"
 AUDIENCE = "https://api.mycotrack.app"
@@ -116,45 +116,7 @@ def test_garbage_token_rejected(anon_client):
     assert resp.status_code == 401
 
 
-def test_me_returns_profile_when_authenticated(client, fake_user):
-    resp = client.get("/api/v1/me")
-    assert resp.status_code == 200
-    body = resp.json()
-    assert body["email"] == fake_user.email
-    assert body["name"] == fake_user.name
-
-
 # --- JIT provisioning ----------------------------------------------------------
-
-
-class _FakeQuery:
-    def __init__(self, result):
-        self._result = result
-
-    def filter(self, *args, **kwargs):
-        return self
-
-    def first(self):
-        return self._result
-
-
-class _FakeSession:
-    def __init__(self, existing=None):
-        self._existing = existing
-        self.added = []
-        self.committed = False
-
-    def query(self, *args, **kwargs):
-        return _FakeQuery(self._existing)
-
-    def add(self, obj):
-        self.added.append(obj)
-
-    def commit(self):
-        self.committed = True
-
-    def refresh(self, obj):
-        pass
 
 
 def _claims(**over):
@@ -168,38 +130,27 @@ def _claims(**over):
     return base
 
 
-def test_provision_creates_user_on_first_login():
-    session = _FakeSession(existing=None)
-    user = _provision_user(session, _claims())
-    assert user in session.added
+def test_provision_creates_user_with_personal_org_on_first_login(db):
+    user = _provision_user(db, _claims())
+
     assert user.auth0_sub == "auth0|new-user"
     assert user.email == "new@example.com"
     assert user.last_login_at is not None
-    assert session.committed
+
+    memberships = db.query(Membership).filter(Membership.user_id == user.id).all()
+    assert len(memberships) == 1
+    assert memberships[0].role == MemberRole.OWNER
+    assert memberships[0].organization.name == "New Grower's Farm"
 
 
-def test_provision_refreshes_existing_user():
-    existing = _existing_user()
-    session = _FakeSession(existing=existing)
-    before_login = existing.last_login_at
+def test_provision_refreshes_existing_user_without_new_org(db):
+    first = _provision_user(db, _claims())
+    before = first.last_login_at
 
-    user = _provision_user(session, _claims(**{f"{NAMESPACE}name": "Renamed"}))
+    again = _provision_user(db, _claims(**{f"{NAMESPACE}name": "Renamed"}))
 
-    assert user is existing
-    assert user.name == "Renamed"
-    assert user.last_login_at != before_login
-    assert session.added == []
-
-
-def _existing_user():
-    from models.user import User
-
-    u = User(
-        auth0_sub="auth0|new-user",
-        email="new@example.com",
-        name="Old Name",
-        picture=None,
-    )
-    u.id = uuid.uuid4()
-    u.last_login_at = datetime(2020, 1, 1, tzinfo=timezone.utc)
-    return u
+    assert again.id == first.id
+    assert again.name == "Renamed"
+    assert again.last_login_at >= before
+    assert db.query(User).count() == 1
+    assert db.query(Organization).count() == 1

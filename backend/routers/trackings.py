@@ -3,7 +3,7 @@ from sqlalchemy.orm import Session
 from datetime import date, datetime, timezone
 from typing import Optional
 from uuid import UUID
-from auth import get_current_user
+from auth.tenancy import OrgContext, read_access, write_access
 from database import get_db
 from models.tracking import Tracking
 from models.batch import Batch
@@ -17,8 +17,17 @@ from schemas.tracking import (
 router = APIRouter(
     prefix="/api/v1/trackings",
     tags=["Trackings"],
-    dependencies=[Depends(get_current_user)],
+    dependencies=[Depends(read_access)],
 )
+
+
+def _org_trackings(db: Session, ctx: OrgContext):
+    """Trackings of the active organization (scoped through their batch)."""
+    return (
+        db.query(Tracking)
+        .join(Batch, Tracking.batch_id == Batch.id)
+        .filter(Batch.organization_id == ctx.organization.id)
+    )
 
 
 @router.get("/", response_model=TrackingListResponse, status_code=status.HTTP_200_OK)
@@ -28,10 +37,11 @@ def list_trackings(
     batch_id: Optional[UUID] = None,
     date_from: Optional[date] = None,
     date_to: Optional[date] = None,
+    ctx: OrgContext = Depends(read_access),
     db: Session = Depends(get_db),
 ):
     """List all trackings with pagination and optional batch filtering."""
-    query = db.query(Tracking)
+    query = _org_trackings(db, ctx)
 
     # Filter by batch_id if the user provided one in the URL
     if batch_id:
@@ -53,9 +63,13 @@ def list_trackings(
 @router.get(
     "/{tracking_id}", response_model=TrackingResponse, status_code=status.HTTP_200_OK
 )
-def get_trackings(tracking_id: UUID, db: Session = Depends(get_db)):
+def get_trackings(
+    tracking_id: UUID,
+    ctx: OrgContext = Depends(read_access),
+    db: Session = Depends(get_db),
+):
     """Retrieve a single tracking by its ID."""
-    tracking = db.query(Tracking).filter(Tracking.id == tracking_id).first()
+    tracking = _org_trackings(db, ctx).filter(Tracking.id == tracking_id).first()
     if not tracking:
         raise HTTPException(
             status_code=status.HTTP_404_NOT_FOUND, detail="tracking not found"
@@ -64,9 +78,20 @@ def get_trackings(tracking_id: UUID, db: Session = Depends(get_db)):
 
 
 @router.post("/", response_model=TrackingResponse, status_code=status.HTTP_201_CREATED)
-def create_trackings(tracking_data: TrackingCreate, db: Session = Depends(get_db)):
+def create_trackings(
+    tracking_data: TrackingCreate,
+    ctx: OrgContext = Depends(write_access),
+    db: Session = Depends(get_db),
+):
     """Create a new tracking entry."""
-    batch = db.query(Batch).filter(Batch.id == tracking_data.batch_id).first()
+    batch = (
+        db.query(Batch)
+        .filter(
+            Batch.id == tracking_data.batch_id,
+            Batch.organization_id == ctx.organization.id,
+        )
+        .first()
+    )
     if not batch:
         raise HTTPException(
             status_code=status.HTTP_404_NOT_FOUND, detail="Associated Batch not found"
@@ -87,10 +112,13 @@ def create_trackings(tracking_data: TrackingCreate, db: Session = Depends(get_db
     "/{tracking_id}", response_model=TrackingResponse, status_code=status.HTTP_200_OK
 )
 def update_trackings(
-    tracking_id: UUID, tracking_data: TrackingUpdate, db: Session = Depends(get_db)
+    tracking_id: UUID,
+    tracking_data: TrackingUpdate,
+    ctx: OrgContext = Depends(write_access),
+    db: Session = Depends(get_db),
 ):
     """Update a tracking entry."""
-    tracking = db.query(Tracking).filter(Tracking.id == tracking_id).first()
+    tracking = _org_trackings(db, ctx).filter(Tracking.id == tracking_id).first()
     if not tracking:
         raise HTTPException(
             status_code=status.HTTP_404_NOT_FOUND, detail="tracking not found"
@@ -107,9 +135,13 @@ def update_trackings(
 
 
 @router.delete("/{tracking_id}", status_code=status.HTTP_204_NO_CONTENT)
-def delete_trackings(tracking_id: UUID, db: Session = Depends(get_db)):
+def delete_trackings(
+    tracking_id: UUID,
+    ctx: OrgContext = Depends(write_access),
+    db: Session = Depends(get_db),
+):
     """Delete a tracking entry."""
-    tracking = db.query(Tracking).filter(Tracking.id == tracking_id).first()
+    tracking = _org_trackings(db, ctx).filter(Tracking.id == tracking_id).first()
     if not tracking:
         raise HTTPException(
             status_code=status.HTTP_404_NOT_FOUND, detail="tracking not found"
