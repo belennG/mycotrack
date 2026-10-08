@@ -1,6 +1,6 @@
 from fastapi import APIRouter, Depends, HTTPException, Query, status
 from sqlalchemy.orm import Session
-from datetime import date
+from datetime import date, timedelta
 from typing import Optional
 from uuid import UUID
 
@@ -56,7 +56,8 @@ def get_batch_analytics(
     if date_from:
         query = query.filter(Tracking.tracking_date >= date_from)
     if date_to:
-        query = query.filter(Tracking.tracking_date <= date_to)
+        # date_to is inclusive: everything before midnight at the end of that day
+        query = query.filter(Tracking.tracking_date < date_to + timedelta(days=1))
 
     trackings = query.order_by(Tracking.tracking_date.asc()).all()
 

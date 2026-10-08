@@ -1,6 +1,6 @@
 from fastapi import APIRouter, Depends, HTTPException, status
 from sqlalchemy.orm import Session
-from datetime import date, datetime, timezone
+from datetime import date, datetime, timedelta, timezone
 from typing import Optional
 from uuid import UUID
 from auth.tenancy import OrgContext, read_access, write_access
@@ -50,11 +50,15 @@ def list_trackings(
     if date_from:
         query = query.filter(Tracking.tracking_date >= date_from)
     if date_to:
-        query = query.filter(Tracking.tracking_date <= date_to)
+        # date_to is inclusive: everything before midnight at the end of that day
+        query = query.filter(Tracking.tracking_date < date_to + timedelta(days=1))
 
     total = query.count()
     trackings = (
-        query.order_by(Tracking.created_at.desc()).offset(skip).limit(limit).all()
+        query.order_by(Tracking.tracking_date.desc(), Tracking.created_at.desc())
+        .offset(skip)
+        .limit(limit)
+        .all()
     )
 
     return {"total": total, "items": trackings}

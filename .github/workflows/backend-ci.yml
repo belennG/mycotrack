@@ -74,6 +74,15 @@ jobs:
         cd backend
         alembic upgrade head
 
+    # Fails if the models and the migrations disagree (e.g. a column type that was changed in
+    # the model but never migrated).
+    - name: Check models match migrations
+      env:
+        DATABASE_URL: postgresql://test_user:test_password@localhost:5432/test_db
+      run: |
+        cd backend
+        alembic check
+
     # Testing
     - name: Run Pytest
       env:

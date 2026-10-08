@@ -74,7 +74,7 @@ class Batch(BaseModel):
         "Tracking",
         back_populates="batch",
         cascade="all, delete-orphan",
-        order_by="desc(Tracking.created_at)",
+        order_by="[desc(Tracking.tracking_date), desc(Tracking.created_at)]",
     )
 
 
