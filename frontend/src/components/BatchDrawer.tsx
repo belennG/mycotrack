@@ -121,6 +121,11 @@ export default function BatchDrawer() {
                     Species
                   </Text>
                   <Input {...register('crop_type')} placeholder="e.g., Psilocybe cubensis" />
+                  {errors.crop_type && (
+                    <Text color="red.500" fontSize="sm">
+                      {errors.crop_type.message}
+                    </Text>
+                  )}
                 </Box>
 
                 <Flex gap={4}>
