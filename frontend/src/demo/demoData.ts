@@ -150,5 +150,26 @@ export function createSeed(): DemoDb {
     }
   })
 
+  // Active batches get a second, earlier reading on their last few days, so the demo shows
+  // several readings per day with their times.
+  SEEDS.forEach((seed, batchIndex) => {
+    if (seed.status !== 'ACTIVE') return
+    for (let daysAgo = 0; daysAgo < 3; daysAgo++) {
+      const date = new Date(now - daysAgo * DAY - 9 * 60 * 60 * 1000)
+      trackings.push({
+        id: `demo-tracking-${batchIndex + 1}-morning-${daysAgo}`,
+        batch_id: `demo-batch-${batchIndex + 1}`,
+        tracking_date: date.toISOString(),
+        temperature: round(seed.base.temperature - 0.8 + (rand() - 0.5)),
+        humidity: round(Math.min(100, seed.base.humidity + 1 + (rand() - 0.5) * 2)),
+        ph_level: round(seed.base.ph_level + (rand() - 0.5) * 0.2, 2),
+        moisture: round(Math.min(100, seed.base.moisture + (rand() - 0.5) * 2)),
+        notes: null,
+        created_at: date.toISOString(),
+        updated_at: date.toISOString(),
+      })
+    }
+  })
+
   return { batches, trackings }
 }

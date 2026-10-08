@@ -60,8 +60,9 @@ const newId = () =>
     ? crypto.randomUUID()
     : `demo-${Math.random().toString(36).slice(2)}`
 
-const byNewest = <T extends { created_at: string }>(a: T, b: T) =>
-  b.created_at.localeCompare(a.created_at)
+/** Newest reading first by when it was taken, then by when it was entered (as the API does). */
+const byReadingTimeDesc = (a: Tracking, b: Tracking) =>
+  b.tracking_date.localeCompare(a.tracking_date) || b.created_at.localeCompare(a.created_at)
 
 function respond<T>(config: InternalAxiosRequestConfig, status: number, data: T): AxiosResponse<T> {
   return { data, status, statusText: String(status), headers: {}, config }
@@ -84,6 +85,22 @@ function route(config: InternalAxiosRequestConfig): AxiosResponse {
   const url = new URL(config.url ?? '', 'http://demo.local')
   const path = url.pathname.replace(/\/+$/, '')
   const params = url.searchParams
+
+  // ---- me ---------------------------------------------------------------
+  if (path === '/v1/me' && method === 'get') {
+    const organization = { id: 'demo-org', name: 'Demo Farm', slug: 'demo-farm', role: 'OWNER' }
+    const now = new Date().toISOString()
+    return respond(config, 200, {
+      id: 'demo-user',
+      email: null,
+      name: 'Demo User',
+      picture: null,
+      created_at: now,
+      last_login_at: now,
+      organization,
+      organizations: [organization],
+    })
+  }
 
   // ---- batches ----------------------------------------------------------
   if (path === '/v1/batches/dashboard' && method === 'get') {
@@ -161,7 +178,7 @@ function route(config: InternalAxiosRequestConfig): AxiosResponse {
       .filter((t) => !batchId || t.batch_id === batchId)
       .filter((t) => !from || t.tracking_date.slice(0, 10) >= from)
       .filter((t) => !to || t.tracking_date.slice(0, 10) <= to)
-      .sort(byNewest)
+      .sort(byReadingTimeDesc)
     return respond(config, 200, {
       total: filtered.length,
       items: filtered.slice(skip, skip + limit),
