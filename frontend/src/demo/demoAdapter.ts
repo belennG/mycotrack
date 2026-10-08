@@ -86,6 +86,22 @@ function route(config: InternalAxiosRequestConfig): AxiosResponse {
   const path = url.pathname.replace(/\/+$/, '')
   const params = url.searchParams
 
+  // ---- me ---------------------------------------------------------------
+  if (path === '/v1/me' && method === 'get') {
+    const organization = { id: 'demo-org', name: 'Demo Farm', slug: 'demo-farm', role: 'OWNER' }
+    const now = new Date().toISOString()
+    return respond(config, 200, {
+      id: 'demo-user',
+      email: null,
+      name: 'Demo User',
+      picture: null,
+      created_at: now,
+      last_login_at: now,
+      organization,
+      organizations: [organization],
+    })
+  }
+
   // ---- batches ----------------------------------------------------------
   if (path === '/v1/batches/dashboard' && method === 'get') {
     const grouped: DashboardResponse = { ACTIVE: [], COMPLETED: [], FAILED: [], ARCHIVED: [] }
