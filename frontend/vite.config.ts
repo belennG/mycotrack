@@ -6,6 +6,8 @@ export default defineConfig({
   plugins: [react()],
   test: {
     environment: 'jsdom',
+    // Playwright's specs live in e2e/ and run with `npm run e2e`, not here.
+    include: ['src/**/*.test.{ts,tsx}'],
     setupFiles: ['./src/test/setup.ts'],
     css: false,
     // Hermetic: never pick up a developer's local .env (API address, Auth0, Sentry).

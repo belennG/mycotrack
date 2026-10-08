@@ -39,10 +39,34 @@ npm run test:coverage    # run once and enforce the coverage thresholds (what CI
 (statements/lines 80%, functions 75%, branches 65%). It is a floor, not a target: raise it as
 coverage grows. An HTML report is written to `coverage/`.
 
+## End-to-end tests (Playwright)
+
+```bash
+npm run e2e        # builds the app, serves it, and runs the browser tests
+npm run e2e:ui     # same, in Playwright's interactive UI
+npx playwright install chromium   # once, to download the browser (~100 MB)
+```
+
+The specs in `e2e/` drive a real Chromium against the **production build**, in **demo mode**:
+the in-browser mock API means no backend, database or Auth0 login is involved, so they are fast,
+deterministic and run anywhere. They cover getting in without an account, the dashboard, adding
+readings (date *and time*, ordering, validation, pagination), creating batches, and dark mode.
+
+- The config pins the locale (`en-US`) and timezone (UTC) so dates read the same on every machine,
+  and never picks up a developer's `.env` (no Auth0, same-origin API).
+- Each test gets a fresh browser context, so demo data never leaks between tests.
+- **Wait for data before reading it.** `readingTexts(page)` waits for the list to load; reading
+  headings straight away sees an empty list, and a test on an empty list passes vacuously.
+- In CI the `e2e` job runs after install, caches the browser, and uploads the HTML report (with
+  screenshots, video and traces of failures) as an artifact when something fails.
+
 ## Known gaps
 
-- The Auth0 SDK itself is mocked; only the app's use of it is covered. Real login is exercised by
-  the Playwright end-to-end tests (#29).
+- The Auth0 SDK itself is mocked in the unit tests, and the end-to-end tests run in demo mode, so
+  a **real Auth0 login is not covered automatically**. Doing that needs a dedicated test user and
+  a deployed environment, and is a follow-up.
+- There is no end-to-end test for **editing or deleting a reading**: the UI has no such action yet
+  (only unused hooks exist).
 - `src/pages/BatchForm.tsx`, `src/pages/Settings.tsx` and `ControlledSelect` are untested:
   `BatchForm` is not used anywhere (the drawer has its own copy of the form) and `Settings` is a
   stub (#45).

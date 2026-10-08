@@ -159,6 +159,7 @@ describe('useUpdateBatch', () => {
     const { Wrapper, queryClient } = createWrapper()
     queryClient.setQueryData(['batch', 'batch-1'], batchFixture())
     queryClient.setQueryData(['batches', 1], { total: 1, items: [] })
+    queryClient.setQueryData(['dashboard'], { ACTIVE: [] })
     const { result } = renderHook(() => useUpdateBatch(), { wrapper: Wrapper })
 
     result.current.mutate({ id: 'batch-1', payload: { notes: 'edited' } })
@@ -168,5 +169,7 @@ describe('useUpdateBatch', () => {
     )
     expect(queryClient.getQueryState(['batch', 'batch-1'])?.isInvalidated).toBe(true)
     expect(queryClient.getQueryState(['batches', 1])?.isInvalidated).toBe(true)
+    // A status change moves the batch to another dashboard column.
+    expect(queryClient.getQueryState(['dashboard'])?.isInvalidated).toBe(true)
   })
 })

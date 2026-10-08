@@ -13,6 +13,7 @@ const DEMO_USER = { name: 'Demo User' }
 /** Switching between demo and real data must never show the other's cached results. */
 function useDemoControls() {
   const queryClient = useQueryClient()
+  const navigate = useNavigate()
   return {
     start: () => {
       queryClient.clear()
@@ -23,6 +24,9 @@ function useDemoControls() {
       queryClient.clear()
       resetDemoDb()
       exitDemoMode()
+      // Signing out is not "being sent to log in": go to /login with no page to return to,
+      // otherwise the next demo would open the page (and batch) the last one ended on.
+      navigate('/login', { replace: true })
     },
   }
 }
