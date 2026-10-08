@@ -29,7 +29,7 @@ variable "deploy_role_name" {
 }
 
 variable "keep_public_website" {
-  description = "Keep the legacy public-read bucket policy (and with it the old S3 website URL). Set to false once CloudFront is verified to make the bucket private."
+  description = "Keep the legacy public-read bucket policy. Off by default: the bucket is private and only CloudFront can read it. The old S3 website URL still works because it now redirects to CloudFront."
   type        = bool
-  default     = true
+  default     = false
 }

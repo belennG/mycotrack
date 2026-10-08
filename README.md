@@ -2,6 +2,12 @@
 
  MycoTrack is a full-stack platform designed for environmental monitoring and sustainable crop management. It enables growers to record and visualise environmental variables (temperature, humidity) across different crop plots.
 
+## 🌐 Live demo
+
+**https://d2ctgb9agyhek5.cloudfront.net**: click **Try the demo** to explore the app with sample data, no account needed. Changes stay in your browser and disappear when you close the tab.
+
+> The older address `http://mycotrack-frontend-prod-2026.s3-website.eu-north-1.amazonaws.com` still works: it now redirects to the HTTPS site above. The site is served through CloudFront (the S3 bucket is private), defined as Terraform in [`infra/`](infra/README.md).
+
 ## 🏗️ Project Structure
 
 The repository is divided into two main services:
