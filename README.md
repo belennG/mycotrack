@@ -183,4 +183,4 @@ Said plainly, because a reviewer will find them anyway:
 
 ---
 
-Built by María Belén Gatti · [github.com/belennG](https://github.com/belennG)
+Built by María Belén Gatti · [LinkedIn](https://www.linkedin.com/in/maria-belen-gatti) · [GitHub](https://github.com/belennG)
