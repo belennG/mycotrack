@@ -17,7 +17,12 @@ import { createSeed, type DemoDb } from './demoData'
  * discards them.
  */
 const STORAGE_KEY = 'mycotrack-demo-db'
-const LATENCY_MS = 150
+let latencyMs = 150
+
+/** Simulated network delay. Tests set it to 0. */
+export function setDemoLatency(ms: number) {
+  latencyMs = ms
+}
 
 let db: DemoDb | null = null
 
@@ -65,7 +70,10 @@ const byReadingTimeDesc = (a: Tracking, b: Tracking) =>
   b.tracking_date.localeCompare(a.tracking_date) || b.created_at.localeCompare(a.created_at)
 
 function respond<T>(config: InternalAxiosRequestConfig, status: number, data: T): AxiosResponse<T> {
-  return { data, status, statusText: String(status), headers: {}, config }
+  // Return a copy, as a real network response would be: the UI (and React Query's cache) must
+  // never share objects with the store, or mutating a response would silently edit the data.
+  const copy = data === null ? data : structuredClone(data)
+  return { data: copy, status, statusText: String(status), headers: {}, config }
 }
 
 function fail(config: InternalAxiosRequestConfig, status: number, detail: string): never {
@@ -243,5 +251,5 @@ export const demoAdapter: AxiosAdapter = (config) =>
       } catch (error) {
         reject(error)
       }
-    }, LATENCY_MS)
+    }, latencyMs)
   })

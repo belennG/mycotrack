@@ -10,7 +10,11 @@
     "preview": "vite preview",
     "test": "vitest run",
     "prepare": "husky || true",
-    "format": "prettier --write \"src/**/*.{js,jsx,ts,tsx,css,md}\""
+    "format": "prettier --write \"src/**/*.{js,jsx,ts,tsx,css,md}\"",
+    "test:watch": "vitest",
+    "test:coverage": "vitest run --coverage",
+    "e2e": "playwright test",
+    "e2e:ui": "playwright test --ui"
   },
   "dependencies": {
     "@auth0/auth0-react": "^2.24.1",
@@ -30,11 +34,18 @@
     "zod": "^4.4.3"
   },
   "devDependencies": {
+    "@playwright/test": "^1.64.0",
+    "@testing-library/jest-dom": "^7.0.1",
+    "@testing-library/react": "^16.3.3",
+    "@testing-library/user-event": "^14.6.7",
     "@types/node": "^24.13.3",
     "@types/react": "^19.2.17",
     "@types/react-dom": "^19.2.3",
     "@vitejs/plugin-react": "^6.0.4",
+    "@vitest/coverage-v8": "^4.1.11",
     "husky": "^9.1.7",
+    "jsdom": "^29.1.1",
+    "msw": "^2.15.0",
     "oxlint": "^1.77.0",
     "prettier": "^3.9.6",
     "typescript": "~6.0.2",

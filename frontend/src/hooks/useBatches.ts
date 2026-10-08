@@ -41,6 +41,9 @@ export function useCreateBatch() {
     },
     onSuccess: (createdBatch: Batch) => {
       queryClient.invalidateQueries({ queryKey: ['batches'] })
+      // The dashboard has its own cached copy (kept fresh for minutes), which would otherwise
+      // keep showing the old batches when the user goes back to it.
+      queryClient.invalidateQueries({ queryKey: ['dashboard'] })
       navigate(`/batches/${createdBatch.id}/trackings`)
       appToast.success('Batch Created', 'Your new cultivation batch has been saved.')
     },
@@ -62,6 +65,8 @@ export function useUpdateBatch() {
     onSuccess: (data) => {
       queryClient.invalidateQueries({ queryKey: ['batch', data.id] })
       queryClient.invalidateQueries({ queryKey: ['batches'] })
+      // A status change moves the batch to another dashboard column.
+      queryClient.invalidateQueries({ queryKey: ['dashboard'] })
       appToast.success('Batch Updated', 'Batch details saved successfully.')
     },
   })
