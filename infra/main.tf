@@ -147,6 +147,33 @@ resource "aws_s3_bucket_policy" "frontend" {
   })
 }
 
+# The legacy S3 website URL (http://<bucket>.s3-website.<region>.amazonaws.com) was shared
+# in job applications. Instead of switching it off, redirect every request to the HTTPS
+# CloudFront site, keeping the path. A redirect-only website endpoint serves no objects, so it
+# keeps working after the bucket is made private.
+resource "aws_s3_bucket_website_configuration" "frontend" {
+  bucket = data.aws_s3_bucket.frontend.id
+
+  redirect_all_requests_to {
+    host_name = aws_cloudfront_distribution.site.domain_name
+    protocol  = "https"
+  }
+}
+
+# Once the legacy public-read statement is gone, close the bucket to the public for good.
+# Applied after the policy so S3 never sees a public policy under an active block.
+resource "aws_s3_bucket_public_access_block" "frontend" {
+  count  = var.keep_public_website ? 0 : 1
+  bucket = data.aws_s3_bucket.frontend.id
+
+  block_public_acls       = true
+  ignore_public_acls      = true
+  block_public_policy     = true
+  restrict_public_buckets = true
+
+  depends_on = [aws_s3_bucket_policy.frontend]
+}
+
 # Let the GitHub Actions deploy role invalidate this distribution after uploading a build.
 # (The role itself and its S3 permissions already exist; this only attaches one more policy.)
 resource "aws_iam_role_policy" "deploy_invalidate" {

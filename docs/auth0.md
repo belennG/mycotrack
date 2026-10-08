@@ -17,32 +17,20 @@ Create an Auth0 tenant per environment, e.g. `mycotrack-dev` (and later
 
 | Setting | Value |
 | --- | --- |
-| Allowed Callback URLs | `http://localhost:5173/callback`, `https://<prod-frontend-domain>/callback` |
-| Allowed Logout URLs | `http://localhost:5173`, `https://<prod-frontend-domain>` |
-| Allowed Web Origins | `http://localhost:5173`, `https://<prod-frontend-domain>` |
+| Allowed Callback URLs | `http://localhost:5173/callback`, `https://d2ctgb9agyhek5.cloudfront.net/callback` |
+| Allowed Logout URLs | `http://localhost:5173`, `https://d2ctgb9agyhek5.cloudfront.net` |
+| Allowed Web Origins | `http://localhost:5173`, `https://d2ctgb9agyhek5.cloudfront.net` |
 
 Copy **Domain** and **Client ID** into the frontend env (step 5).
 
-### `<prod-frontend-domain>` — the URL the deployed SPA is served from
+### The production URL
 
-For **local dev you don't need this** — `http://localhost:5173` is enough to log
-in.
+The deployed site is served over HTTPS by CloudFront at
+`https://d2ctgb9agyhek5.cloudfront.net` (see [`infra/README.md`](../infra/README.md)). Use that
+exact domain above. Auth0 rejects `http://` callback URLs for anything except `localhost`, which
+is why the old HTTP-only S3 URL could never log in (it now redirects to the HTTPS site).
 
-For the **deployed** app it's whatever host serves `frontend/dist`. Today that is
-the S3 static-website bucket `mycotrack-frontend-prod-2026` in `eu-north-1`:
-
-```
-mycotrack-frontend-prod-2026.s3-website.eu-north-1.amazonaws.com
-```
-
-**But Auth0 rejects non-HTTPS callback URLs for any host other than
-`localhost`**, and the S3 website endpoint is `http://` only. So logging in on
-the deployed site does **not** work until the frontend is served over HTTPS —
-i.e. behind CloudFront (or an ALB / custom domain). That's issue #31; once
-CloudFront is in front of the bucket, use its domain
-(`https://d1234abcd.cloudfront.net`, or your custom domain) here.
-
-Until then: develop and demo Auth0 against `localhost`.
+For local dev, `http://localhost:5173` is enough.
 
 ## 3. API
 
@@ -160,5 +148,4 @@ account:
   when the tab closes. Nothing is sent to the backend or to Auth0.
 - Components use `useAppAuth()` (`frontend/src/auth/AppAuthContext.tsx`), which
   merges Auth0 and demo state, so the app also runs with **no `VITE_AUTH0_*` set**
-  (login disabled, demo available). That makes the deployed S3 site usable before
-  HTTPS/CloudFront exists.
+  (login disabled, demo available), so a deployment without an Auth0 tenant is still usable.
