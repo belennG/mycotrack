@@ -3,6 +3,7 @@ import AppLayout from './components/AppLayout'
 import { AuthGuard } from './auth/AuthGuard'
 import Callback from './pages/Callback'
 import Login from './pages/Login'
+import StartDemo from './pages/StartDemo'
 import Dashboard from './pages/Dashboard'
 import Trackings from './pages/Trackings'
 import Settings from './pages/Settings'
@@ -12,6 +13,7 @@ function App() {
     <Routes>
       {/* Public routes — must stay outside the guard */}
       <Route path="/login" element={<Login />} />
+      <Route path="/demo" element={<StartDemo />} />
       <Route path="/callback" element={<Callback />} />
 
       <Route element={<AuthGuard />}>
