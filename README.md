@@ -103,13 +103,13 @@ erDiagram
 
 | Level | What | How |
 | --- | --- | --- |
-| **Backend** | 113 tests: token validation, first-login provisioning, tenant isolation, roles, time-of-day handling, the assistant (tools, loop, endpoint, rate limits) | pytest on an in-memory database; the model is scripted, so no API key or cost |
+| **Backend** | 148 tests: token validation, first-login provisioning, tenant isolation, roles, time-of-day handling, the assistant (tools, loop, endpoint, rate limits), alert rules (thresholds by crop, trends) | pytest on an in-memory database; the model is scripted, so no API key or cost |
 | **Frontend unit and component** | 161 tests, ~86% line coverage, enforced in CI | Vitest, Testing Library, MSW. Any API call without a mock **fails the test** |
 | **End to end** | 34 browser tests: access, dashboard, readings, batches, assistant, dark mode | Playwright against the production build |
 
 The tests were written to be able to fail: key behaviors were deliberately broken to confirm the right tests caught them, the unit tests pass on Node 22 and 25 and in three timezones, and they found real bugs, which are fixed. → [frontend/docs/testing.md](frontend/docs/testing.md)
 
-Every pull request runs: formatting, linting, type checks, migrations on a real PostgreSQL (plus a check that they match the models), the backend tests, the frontend unit tests with a coverage floor, the browser tests, and security scans (`npm audit` fails the build at high severity; Bandit and Safety are advisory).
+Every pull request runs: formatting, linting, type checks, migrations on a real PostgreSQL (plus a check that they match the models), the backend tests, the frontend unit tests with a coverage floor, the browser tests, and security scans (`npm audit` fails the build at high severity; Bandit and pip-audit are advisory).
 
 Between pull requests, a **weekly scheduled audit** (`npm audit` and `pip-audit`) opens a GitHub issue if a vulnerable dependency appears, and Dependabot proposes the updates, grouped so keeping up is one quick review a week.
 

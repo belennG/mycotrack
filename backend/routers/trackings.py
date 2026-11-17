@@ -7,6 +7,7 @@ from auth.tenancy import OrgContext, read_access, write_access
 from database import get_db
 from models.tracking import Tracking
 from models.batch import Batch
+from services.alerts import record_alerts
 from schemas.tracking import (
     TrackingCreate,
     TrackingUpdate,
@@ -103,6 +104,7 @@ def create_trackings(
 
     new_tracking = Tracking(**tracking_data.model_dump())
     db.add(new_tracking)
+    record_alerts(db, batch)
 
     batch.updated_at = datetime.now(timezone.utc)  # type: ignore[assignment]
     # @TODO change to mapped_column
