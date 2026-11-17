@@ -7,6 +7,7 @@ injected instruction says, and check the system still cannot be made to leak or 
 
 import copy
 import json
+from datetime import datetime
 from dataclasses import replace
 from types import SimpleNamespace
 
@@ -319,6 +320,13 @@ def test_the_request_carries_the_tools_the_system_prompt_and_the_model(world):
     assert request["tools"] == tool_schemas()
     assert "<user_note>" in request["system"]
     assert request["messages"] == [{"role": "user", "content": "hi"}]
+
+
+def test_the_model_is_told_the_current_date_and_time(world):
+    """Without it "today" and "this week" mean nothing to the model."""
+    client = FakeClient(reply(text("ok")))
+    run_agent("hi", world.ctx, world.db, client, now=datetime(2026, 11, 17, 14, 5))
+    assert "2026-11-17 14:05 UTC" in client.requests[0]["system"]
 
 
 def test_tool_round_trip_feeds_the_result_back_to_the_model(world):

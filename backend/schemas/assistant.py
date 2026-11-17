@@ -5,7 +5,9 @@ from pydantic import BaseModel, Field, field_validator, model_validator
 from agent.loop import MAX_QUESTION_CHARS
 
 MAX_HISTORY_MESSAGES = 6  # three question/answer pairs
-MAX_HISTORY_CHARS = 2000  # per message
+# Per message. Must fit a full answer: the model may write up to 1024 tokens (~5000 characters),
+# and that answer comes back as history on the next question.
+MAX_HISTORY_CHARS = 6000
 
 
 class ChatMessage(BaseModel):

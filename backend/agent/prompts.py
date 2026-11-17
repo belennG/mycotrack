@@ -1,6 +1,8 @@
 """The system prompt. Instructions here are a *supporting* defense, never the main one:
 the real guarantees come from the tools (read-only, tenant fixed by the server)."""
 
+from datetime import datetime
+
 SYSTEM_PROMPT = """\
 You are the MycoTrack assistant, helping mushroom growers understand their cultivation batches.
 
@@ -27,3 +29,13 @@ judge a batch of another species against them.
 - Do not give medical, food-safety or legal advice. For decisions about spoilage or whether a \
 crop is safe to eat, tell the user to check with an expert.
 """
+
+
+def build_system_prompt(now: datetime) -> str:
+    """The prompt plus the current time: without it the model cannot tell what "today" or
+    "this week" means, nor how old a reading is."""
+    return (
+        f"{SYSTEM_PROMPT}\n"
+        f"The current date and time is {now:%Y-%m-%d %H:%M} UTC. "
+        "Times in tool results carry no time zone: read them on that same clock.\n"
+    )

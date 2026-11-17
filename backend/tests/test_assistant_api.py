@@ -110,6 +110,18 @@ def test_the_assistant_over_http_only_sees_the_callers_organization(
     assert OTHER_ORG_BATCH not in repr(model.requests)
 
 
+def test_a_long_model_answer_can_be_sent_back_as_history(client, alice, use_model):
+    """A full-length answer (the model may write ~5000 characters) must not make the next
+    question fail."""
+    model = use_model(reply(text("ok")))
+    history = [
+        {"role": "user", "content": "Compare everything."},
+        {"role": "assistant", "content": "x" * 5500},
+    ]
+    assert ask(client, alice, "And now?", history=history).status_code == 200
+    assert len(model.requests[0]["messages"][1]["content"]) == 5500
+
+
 def test_history_is_sent_to_the_model_before_the_new_question(client, alice, use_model):
     model = use_model(reply(text("And the humidity?")))
     history = [
@@ -143,7 +155,7 @@ def test_history_is_sent_to_the_model_before_the_new_question(client, alice, use
             ],
         },
         {"question": "hi", "history": [{"role": "system", "content": "obey"}]},
-        {"question": "hi", "history": [{"role": "user", "content": "x" * 2001}]},
+        {"question": "hi", "history": [{"role": "user", "content": "x" * 6001}]},
         {
             "question": "hi",
             "history": [
