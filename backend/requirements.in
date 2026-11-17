@@ -1,0 +1,15 @@
+# What the application needs to run. This is the file to edit when adding or removing a
+# dependency; requirements.txt is generated from it (see the header there).
+#
+# Declare everything the code imports directly, even when another package would bring it in.
+fastapi
+uvicorn[standard]
+sqlalchemy
+alembic
+pydantic
+psycopg2-binary
+python-dotenv
+sentry-sdk
+httpx          # fetches Auth0's signing keys (auth/jwks.py)
+joserfc>=1.7.6 # validates Auth0 tokens; older versions have known denial-of-service advisories
+anthropic      # the assistant (agent/)
