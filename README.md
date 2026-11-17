@@ -8,9 +8,9 @@
 
 A full-stack project, built to production standards: multi-tenant, authenticated, tested at three levels, and deployed to AWS with infrastructure as code.
 
-### 👉 [**Try the live demo**](https://d2ctgb9agyhek5.cloudfront.net)
+### 👉 [**Try the live demo**](https://d2ctgb9agyhek5.cloudfront.net/demo)
 
-Click **Try the demo**: no account needed. It runs on sample data that lives only in your browser and disappears when you close the tab.
+One click, no account needed: it opens straight into the app on sample data that lives only in your browser and disappears when you close the tab. (The [home page](https://d2ctgb9agyhek5.cloudfront.net) offers the same demo next to the Auth0 login.)
 
 ![The dashboard](docs/screenshots/dashboard.png)
 
