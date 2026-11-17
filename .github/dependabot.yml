@@ -1,0 +1,42 @@
+# Dependabot version updates: one grouped pull request per ecosystem per week for minor and
+# patch releases, so keeping up is a quick review rather than a flood. Major versions arrive as
+# their own pull requests, because they are the ones that can break things.
+#
+# This is separate from Dependabot *security* updates (pull requests that fix a known
+# vulnerability), which are switched on in the repository settings and raised right away, not on
+# this schedule. The pull requests go to the default branch, develop.
+version: 2
+updates:
+  - package-ecosystem: npm
+    directory: /frontend
+    schedule:
+      interval: weekly
+      day: monday
+    open-pull-requests-limit: 5
+    groups:
+      minor-and-patch:
+        update-types: [minor, patch]
+
+  - package-ecosystem: pip
+    directory: /backend
+    schedule:
+      interval: weekly
+      day: monday
+    open-pull-requests-limit: 5
+    groups:
+      minor-and-patch:
+        update-types: [minor, patch]
+
+  - package-ecosystem: github-actions
+    directory: /
+    schedule:
+      interval: weekly
+      day: monday
+    groups:
+      actions:
+        patterns: ["*"]
+
+  - package-ecosystem: terraform
+    directory: /infra
+    schedule:
+      interval: monthly

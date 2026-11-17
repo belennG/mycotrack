@@ -109,6 +109,8 @@ The tests were written to be able to fail: key behaviors were deliberately broke
 
 Every pull request runs: formatting, linting, type checks, migrations on a real PostgreSQL (plus a check that they match the models), the backend tests, the frontend unit tests with a coverage floor, the browser tests, and security scans (`npm audit` fails the build at high severity; Bandit and Safety are advisory).
 
+Between pull requests, a **weekly scheduled audit** (`npm audit` and `pip-audit`) opens a GitHub issue if a vulnerable dependency appears, and Dependabot proposes the updates, grouped so keeping up is one quick review a week.
+
 ## Run it locally
 
 ### The frontend, with the demo (no backend, no account)
