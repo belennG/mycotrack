@@ -8,6 +8,16 @@ export async function startDemo(page: Page) {
   await expect(page.getByRole('heading', { name: 'Cultivation Dashboard' })).toBeVisible()
 }
 
+/**
+ * A batch's card on the dashboard: the nearest block around its name that holds its latest log.
+ * (Not "the name's parent": the name sits next to the alerts marker, so that parent is smaller.)
+ */
+export function batchCard(page: Page, name: string) {
+  return page
+    .getByRole('heading', { name })
+    .locator('xpath=ancestor::div[contains(., "Latest Log")][1]')
+}
+
 /** Open the first batch (Oyster-Block-01) from the dashboard. */
 export async function openOysterBatch(page: Page) {
   await page.getByText('Oyster-Block-01').click()
