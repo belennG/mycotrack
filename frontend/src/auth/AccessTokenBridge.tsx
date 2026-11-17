@@ -17,7 +17,8 @@ export function AccessTokenBridge() {
   useEffect(() => {
     setAccessTokenProvider(async () => {
       if (!isAuthenticated) return null
-      return getAccessTokenSilently()
+      // Since auth0-react 2.30 this can also resolve to undefined; the provider type says null.
+      return (await getAccessTokenSilently()) ?? null
     })
     return () => setAccessTokenProvider(null)
   }, [isAuthenticated, getAccessTokenSilently])
