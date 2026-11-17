@@ -21,7 +21,7 @@ Costs a few tenths of a cent. Re-run it when the sample data or the assistant ch
 import json
 import os
 import shutil
-import subprocess  # nosec B404 - runs one fixed command, see dump_demo_seed
+import subprocess  # nosec B404
 import sys
 import uuid
 from datetime import datetime, timezone
@@ -73,9 +73,9 @@ def dump_demo_seed(now: datetime) -> dict:
         raise SystemExit(
             "Node 22.18 or later is needed to build the demo's sample data."
         )
-    # A fixed command: the program is found on PATH, the script is a constant, and the only
-    # values passed in (a timestamp and a file path inside this repository) travel as
-    # environment variables, never as part of the command line.
+    # B404 and B603 do not apply: this is a fixed command. The program is found on PATH,
+    # the script is a constant, and the only values passed in (a timestamp and a file path
+    # inside this repository) travel as environment variables, never on the command line.
     result = subprocess.run(  # nosec B603
         [node, "--input-type=module", "-e", DUMP_SEED],
         capture_output=True,
