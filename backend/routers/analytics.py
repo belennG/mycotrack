@@ -14,6 +14,7 @@ from services.analytics import (
     calculate_completeness,
 )
 from services.alerts import generate_alerts
+from services.thresholds import thresholds_for
 from schemas.alert import AnalyticsResponse, BatchSummaryResponse
 
 router = APIRouter(
@@ -109,7 +110,8 @@ def get_batch_summary(
     Get overall health status, key metrics, and active alerts count for a batch.
 
     ### Alert Threshold Documentation:
-    Alerts are generated based on the following default safe ranges:
+    Alerts are judged against safe ranges chosen by the batch's crop type (see
+    `services/thresholds.py`). A crop that is not recognised gets the oyster ranges:
     * **Temperature:** 20.0°C to 25.0°C
     * **Humidity:** 85.0% to 95.0%
     * **pH Level:** 6.0 to 7.5
@@ -143,7 +145,9 @@ def get_batch_summary(
     # Evaluate health based on the most recent tracking
     if trackings:
         latest_tracking = trackings[-1]
-        active_alerts = generate_alerts(latest_tracking)
+        active_alerts = generate_alerts(
+            latest_tracking, thresholds_for(batch.crop_type)
+        )
         alerts_count = len(active_alerts)
 
         if alerts_count > 0:

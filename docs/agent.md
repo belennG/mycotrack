@@ -24,13 +24,14 @@ The model never touches the database. It asks; our code decides whether and how 
 
 ## What it can do
 
-Three read-only tools, in [`agent/tools.py`](../backend/agent/tools.py):
+Four read-only tools, in [`agent/tools.py`](../backend/agent/tools.py):
 
 | Tool | Returns |
 | --- | --- |
 | `list_batches` | The organization's batches, with each one's latest reading |
 | `get_batch_summary` | One batch: averages, trends, whether the latest reading is out of range |
 | `get_recent_readings` | The newest readings of one batch (at most 20) |
+| `list_alerts` | The alerts of the organization (open by default, at most 10, with the true total), and the rule behind each kind. It can read them; it cannot create, acknowledge or dismiss one |
 
 ## How it is kept safe
 
@@ -103,5 +104,6 @@ a signed-in account, with per-user rate limits and a spend cap set in the Anthro
 ## Not yet / next
 
 1. Writing readings from natural language, with explicit confirmation.
-2. Alerts: deterministic threshold and trend rules that create alerts (the `alerts` table is never
-   written today); the agent would only *explain* an alert that already fired, and the code sends it.
+2. Alerts by email (see [alerts.md](alerts.md)). The rules, the Alerts page and the assistant's
+   read-only `list_alerts` tool exist. The agent only *explains* an alert that already fired; the
+   code decides and sends.

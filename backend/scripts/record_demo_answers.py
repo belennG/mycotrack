@@ -29,7 +29,7 @@ from pathlib import Path
 
 import anthropic
 from dotenv import load_dotenv
-from sqlalchemy import create_engine
+from sqlalchemy import create_engine, func
 from sqlalchemy.orm import Session, sessionmaker
 from sqlalchemy.pool import StaticPool
 
@@ -41,6 +41,7 @@ from models.batch import Batch, BatchStatus
 from models.organization import Membership, MemberRole, Organization
 from models.tracking import Tracking
 from models.user import User
+from services.alerts import record_alerts
 
 REPO = Path(__file__).resolve().parents[2]
 OUTPUT = REPO / "frontend" / "src" / "demo" / "assistantRecordings.json"
@@ -49,6 +50,7 @@ OUTPUT = REPO / "frontend" / "src" / "demo" / "assistantRecordings.json"
 # request to write, to show that the assistant is read-only.
 QUESTIONS = [
     "Which of my batches need attention?",
+    "Why is there an alert on Oyster-Block-01?",
     "How is Oyster-Block-01 doing?",
     "Compare the average temperature of my active batches.",
     "Why did KingOyster-Trial-02 fail?",
@@ -97,7 +99,7 @@ def naive_utc(iso: str | None) -> datetime | None:
 
 
 def load_into_database(db: Session, seed: dict) -> OrgContext:
-    """Put the demo's batches and readings into the database as one organization's data."""
+    """Put the demo's batches, readings and alerts into the database as one organization's data."""
     user = User(auth0_sub="auth0|demo", email="demo@example.com", name="Demo User")
     org = Organization(name="Demo Farm", slug="demo-farm")
     db.add_all([user, org])
@@ -137,6 +139,17 @@ def load_into_database(db: Session, seed: dict) -> OrgContext:
                 notes=item.get("notes"),
             )
         )
+    db.flush()
+
+    # The alerts the demo shows: what the rules say about each batch as its readings stand.
+    # (The demo works them out with a TypeScript copy of the same rules.)
+    for batch in db.query(Batch).filter(Batch.organization_id == org.id):
+        latest = (
+            db.query(func.max(Tracking.tracking_date))
+            .filter(Tracking.batch_id == batch.id)
+            .scalar()
+        )
+        record_alerts(db, batch, now=latest)
     db.commit()
     return OrgContext(user=user, organization=org, membership=membership)
 

@@ -38,8 +38,12 @@ jobs:
       - name: Run Code Quality Checks (Oxlint)
         run: npm run lint
 
-      - name: Run Security Vulnerability Audit
-        run: npm audit --audit-level=high
+      # Only what ships to users can block a pull request. An advisory in a build or test tool
+      # (Vite, Vitest and their helpers) cannot reach the browser, and it would otherwise stop
+      # every pull request until its maintainers publish a fix. The weekly security audit still
+      # checks everything, development tools included, and opens an issue for it.
+      - name: Run Security Vulnerability Audit (production dependencies)
+        run: npm audit --omit=dev --audit-level=high
 
       - name: Run Unit and Component Tests (Vitest, with coverage thresholds)
         run: npm run test:coverage

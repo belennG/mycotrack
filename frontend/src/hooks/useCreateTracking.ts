@@ -14,6 +14,8 @@ export function useCreateTracking() {
     onSuccess: async () => {
       await queryClient.refetchQueries({ queryKey: ['dashboard'] })
       queryClient.invalidateQueries({ queryKey: ['trackings'] })
+      // Saving a reading can raise an alert.
+      queryClient.invalidateQueries({ queryKey: ['alerts'] })
       appToast.success('Tracking Created', 'Tracking for batch has been saved.')
     },
     onError: (error: any) => {

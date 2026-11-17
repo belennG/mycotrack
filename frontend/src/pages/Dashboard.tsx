@@ -1,6 +1,7 @@
 import { useNavigate } from 'react-router-dom'
 import { Box, Heading, Text, VStack, HStack, SimpleGrid, Badge, Flex } from '@chakra-ui/react'
 import { useDashboard } from '../hooks/useBatches'
+import { useAlerts } from '../hooks/useAlerts'
 import type { DashboardBatch } from '../types/batch'
 import BatchTrackingModal from '../components/BatchTrackingModal'
 import BatchDrawer from '../components/BatchDrawer'
@@ -17,6 +18,17 @@ const statusColors: Record<string, string> = {
 export default function Dashboard() {
   const navigate = useNavigate()
   const { data, isLoading, isError } = useDashboard()
+  const { data: openAlerts } = useAlerts('open')
+
+  // Open alerts per batch, and whether any of them is already out of range.
+  const alertsByBatch = new Map<string, { count: number; critical: boolean }>()
+  for (const alert of openAlerts?.items ?? []) {
+    const entry = alertsByBatch.get(alert.batch_id) ?? { count: 0, critical: false }
+    alertsByBatch.set(alert.batch_id, {
+      count: entry.count + 1,
+      critical: entry.critical || alert.severity === 'critical',
+    })
+  }
 
   const totalBatches = data ? Object.values(data).reduce((acc, group) => acc + group.length, 0) : 0
 
@@ -75,9 +87,24 @@ export default function Dashboard() {
                   transition="all 0.2s"
                   onClick={() => navigate(`/batches/${batch.id}/trackings`)}
                 >
-                  <Heading size="sm" mb={1} lineClamp={1} color={'black'}>
-                    {batch.batch_name}
-                  </Heading>
+                  <Flex justify="space-between" align="center" gap={2} mb={1}>
+                    <Heading size="sm" lineClamp={1} color={'black'}>
+                      {batch.batch_name}
+                    </Heading>
+                    {alertsByBatch.has(batch.id) && (
+                      <Badge
+                        data-severity={
+                          alertsByBatch.get(batch.id)!.critical ? 'critical' : 'warning'
+                        }
+                        colorPalette={alertsByBatch.get(batch.id)!.critical ? 'red' : 'orange'}
+                        borderRadius="full"
+                        flexShrink={0}
+                      >
+                        ⚠ {alertsByBatch.get(batch.id)!.count}{' '}
+                        {alertsByBatch.get(batch.id)!.count === 1 ? 'alert' : 'alerts'}
+                      </Badge>
+                    )}
+                  </Flex>
 
                   {batch.notes && (
                     <Text fontSize="xs" color="gray.500" mb={3} lineClamp={2}>

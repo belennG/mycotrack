@@ -1,8 +1,9 @@
 import { useState, useEffect } from 'react'
-import { Box, Flex, Button, Heading, HStack, Text, Image } from '@chakra-ui/react'
+import { Badge, Box, Flex, Button, Heading, HStack, Text, Image } from '@chakra-ui/react'
 import { NavLink } from 'react-router-dom'
 import { useAppAuth } from '../auth/AppAuthContext'
 import { useMe } from '../hooks/useMe'
+import { useAlerts } from '../hooks/useAlerts'
 
 const roleLabel = (role: string) => role.charAt(0) + role.slice(1).toLowerCase()
 
@@ -29,6 +30,21 @@ function AuthControls() {
         {mode === 'demo' ? 'Exit demo' : 'Log out'}
       </Button>
     </HStack>
+  )
+}
+
+function AlertsLink() {
+  const { data } = useAlerts('open')
+  const count = data?.total ?? 0
+  return (
+    <NavLink to="/alerts" style={({ isActive }) => ({ fontWeight: isActive ? 'bold' : 'normal' })}>
+      Alerts
+      {count > 0 && (
+        <Badge ml={1} colorPalette="red" borderRadius="full" aria-label={`${count} open`}>
+          {count}
+        </Badge>
+      )}
+    </NavLink>
   )
 }
 
@@ -81,6 +97,7 @@ export default function Header() {
         >
           Dashboard
         </NavLink>
+        <AlertsLink />
         <NavLink
           to="/assistant"
           style={({ isActive }) => ({ fontWeight: isActive ? 'bold' : 'normal' })}

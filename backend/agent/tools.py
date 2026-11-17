@@ -26,9 +26,11 @@ from sqlalchemy.orm import Session
 
 from agent.sanitize import clean, wrap_note
 from auth.tenancy import OrgContext
+from models.alert import Alert
 from models.batch import Batch
 from models.tracking import Tracking
-from services.alerts import DEFAULT_THRESHOLDS, generate_alerts
+from services.alerts import generate_alerts
+from services.thresholds import preset_for
 from services.analytics import analyze_trends, calculate_averages
 
 logger = logging.getLogger(__name__)
@@ -37,6 +39,7 @@ MAX_TOOL_RESULT_CHARS = 6000
 MAX_BATCHES_LISTED = 50
 SUMMARY_WINDOW = 50
 MAX_READINGS = 20
+MAX_ALERTS_LISTED = 10
 
 
 class ToolError(Exception):
@@ -69,6 +72,17 @@ class RecentReadingsInput(_Input):
         ge=1,
         le=MAX_READINGS,
         description="How many readings, newest first.",
+    )
+
+
+class ListAlertsInput(_Input):
+    status: Literal["open", "acknowledged"] = Field(
+        default="open",
+        description="'open' for alerts nobody has dealt with yet, 'acknowledged' for the rest.",
+    )
+    batch_id: UUID | None = Field(
+        default=None,
+        description="Only the alerts of this batch (an id from list_batches). Omit for all.",
     )
 
 
@@ -167,7 +181,8 @@ def _get_batch_summary(args: BatchIdInput, ctx: OrgContext, db: Session) -> dict
         summary["health"] = "No readings recorded yet."
         return summary
 
-    issues = generate_alerts(readings[0])
+    preset, thresholds = preset_for(batch.crop_type)
+    issues = generate_alerts(readings[0], thresholds)
     summary.update(
         {
             "averages": calculate_averages(readings),
@@ -175,9 +190,13 @@ def _get_batch_summary(args: BatchIdInput, ctx: OrgContext, db: Session) -> dict
             "latest_reading": _reading(readings[0]),
             "health": "Needs attention" if issues else "Within range",
             "current_issues": [issue["message"] for issue in issues],
-            "thresholds_used": DEFAULT_THRESHOLDS,
+            "thresholds_used": thresholds,
             "thresholds_note": (
-                "Fixed defaults for oyster mushrooms, not specific to this batch's species."
+                f"Safe ranges for this batch's crop type ({preset}). They are approximate "
+                "guide values, not advice for a particular strain or room."
+                if not preset.startswith("default")
+                else "This crop type has no ranges of its own, so the oyster mushroom ranges "
+                "are used as a default; treat the comparison as rough."
             ),
         }
     )
@@ -193,6 +212,66 @@ def _get_recent_readings(
         "batch": clean(batch.batch_name),
         "count": len(readings),
         "readings": [_reading(reading) for reading in readings],
+    }
+
+
+# What each kind of alert means, in the words of the rules that raise it. The model explains an
+# alert from this and the batch's readings; it does not decide whether an alert exists.
+_THRESHOLD_RULE = (
+    "Raised because the latest reading of this value was outside the safe range for the "
+    "batch's crop type."
+)
+_TREND_RULE = (
+    "A warning raised before the value leaves its safe range: it moved the same way on each of "
+    "the last 4 readings, and at that pace it would cross a limit within 48 hours."
+)
+
+
+def _rule_for(alert_type: str) -> str:
+    return _TREND_RULE if "_trending_" in alert_type else _THRESHOLD_RULE
+
+
+def _list_alerts(args: ListAlertsInput, ctx: OrgContext, db: Session) -> dict:
+    if args.batch_id is not None:
+        # Another organization's batch is "not found", exactly like a missing one.
+        _get_batch(db, ctx, args.batch_id)
+
+    query = (
+        db.query(Alert)
+        .join(Batch, Alert.batch_id == Batch.id)
+        .filter(
+            Batch.organization_id == ctx.organization.id,
+            Alert.is_acknowledged.is_(args.status == "acknowledged"),
+        )
+    )
+    if args.batch_id is not None:
+        query = query.filter(Alert.batch_id == args.batch_id)
+
+    total = query.count()
+    alerts = query.order_by(Alert.created_at.desc()).limit(MAX_ALERTS_LISTED).all()
+    return {
+        "status": args.status,
+        "total": total,
+        "shown": len(alerts),
+        "note": (
+            "Alerts stay open until a person acknowledges them, so an open alert can be about "
+            "something that has since gone back to normal: check the batch's latest readings "
+            "before saying a problem is still there."
+        ),
+        # Said once per kind of alert, not repeated on every alert, so the result stays small.
+        "rules": {alert.alert_type: _rule_for(alert.alert_type) for alert in alerts},
+        "alerts": [
+            {
+                "batch_id": str(alert.batch_id),
+                "batch": clean(alert.batch.batch_name),
+                "type": alert.alert_type,
+                "severity": alert.severity,
+                "message": clean(alert.message),
+                "raised_at": alert.created_at.isoformat(),
+                "acknowledged": alert.is_acknowledged,
+            }
+            for alert in alerts
+        ],
     }
 
 
@@ -228,6 +307,17 @@ TOOLS: dict[str, Tool] = {
             ),
             input_model=RecentReadingsInput,
             handler=_get_recent_readings,
+        ),
+        Tool(
+            name="list_alerts",
+            description=(
+                "List the alerts raised for the user's batches (open ones by default), newest "
+                "first, with the rule behind each kind of alert. Use it for 'what needs "
+                "attention?', 'why is there an alert on batch X?' or to explain one. You can "
+                "only read alerts: you cannot create, acknowledge or dismiss them."
+            ),
+            input_model=ListAlertsInput,
+            handler=_list_alerts,
         ),
     )
 }

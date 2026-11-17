@@ -24,6 +24,7 @@ describe('useCreateTracking', () => {
     )
     const { Wrapper, queryClient } = createWrapper()
     queryClient.setQueryData(['trackings', 'batch-1', 1], { total: 0, items: [] })
+    queryClient.setQueryData(['alerts', 'open'], { total: 0, items: [] })
     const { result } = renderHook(() => useCreateTracking(), { wrapper: Wrapper })
 
     result.current.mutate({
@@ -41,6 +42,8 @@ describe('useCreateTracking', () => {
       temperature: 22.5,
     })
     expect(queryClient.getQueryState(['trackings', 'batch-1', 1])?.isInvalidated).toBe(true)
+    // Saving a reading can raise an alert, so the alerts are refetched too.
+    expect(queryClient.getQueryState(['alerts', 'open'])?.isInvalidated).toBe(true)
   })
 
   it('shows the API’s reason when the batch does not exist', async () => {

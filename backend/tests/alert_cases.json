@@ -1,0 +1,438 @@
+{
+ "_comment": "Shared by backend/tests/test_alert_cases.py and frontend/src/demo/alertRules.test.ts, so the Python rules and their TypeScript copy for the demo cannot drift apart. 'hours' is the time of each reading in hours from the first.",
+ "cases": [
+  {
+   "name": "healthy oyster batch",
+   "crop": "Oyster Mushroom",
+   "readings": [
+    {
+     "hours": 0,
+     "temperature": 22.0,
+     "humidity": 90,
+     "ph_level": 6.8,
+     "moisture": 80.0
+    },
+    {
+     "hours": 12,
+     "temperature": 22.0,
+     "humidity": 90.5,
+     "ph_level": 6.8,
+     "moisture": 80.0
+    },
+    {
+     "hours": 24,
+     "temperature": 22.0,
+     "humidity": 90,
+     "ph_level": 6.8,
+     "moisture": 80.0
+    },
+    {
+     "hours": 36,
+     "temperature": 22.0,
+     "humidity": 90.5,
+     "ph_level": 6.8,
+     "moisture": 80.0
+    }
+   ],
+   "expected": []
+  },
+  {
+   "name": "humidity falling towards the lower limit",
+   "crop": "Oyster Mushroom",
+   "readings": [
+    {
+     "hours": 0,
+     "temperature": 22.0,
+     "humidity": 92.0,
+     "ph_level": 6.8,
+     "moisture": 80.0
+    },
+    {
+     "hours": 12,
+     "temperature": 22.0,
+     "humidity": 90.6,
+     "ph_level": 6.8,
+     "moisture": 80.0
+    },
+    {
+     "hours": 24,
+     "temperature": 22.0,
+     "humidity": 89.2,
+     "ph_level": 6.8,
+     "moisture": 80.0
+    },
+    {
+     "hours": 36,
+     "temperature": 22.0,
+     "humidity": 87.8,
+     "ph_level": 6.8,
+     "moisture": 80.0
+    }
+   ],
+   "expected": [
+    "humidity_trending_low"
+   ]
+  },
+  {
+   "name": "humidity rising towards the upper limit",
+   "crop": "Oyster Mushroom",
+   "readings": [
+    {
+     "hours": 0,
+     "temperature": 22.0,
+     "humidity": 90.0,
+     "ph_level": 6.8,
+     "moisture": 80.0
+    },
+    {
+     "hours": 12,
+     "temperature": 22.0,
+     "humidity": 91.4,
+     "ph_level": 6.8,
+     "moisture": 80.0
+    },
+    {
+     "hours": 24,
+     "temperature": 22.0,
+     "humidity": 92.8,
+     "ph_level": 6.8,
+     "moisture": 80.0
+    },
+    {
+     "hours": 36,
+     "temperature": 22.0,
+     "humidity": 94.0,
+     "ph_level": 6.8,
+     "moisture": 80.0
+    }
+   ],
+   "expected": [
+    "humidity_trending_high"
+   ]
+  },
+  {
+   "name": "humidity already below the range",
+   "crop": "Oyster Mushroom",
+   "readings": [
+    {
+     "hours": 0,
+     "temperature": 22.0,
+     "humidity": 90.0,
+     "ph_level": 6.8,
+     "moisture": 80.0
+    },
+    {
+     "hours": 12,
+     "temperature": 22.0,
+     "humidity": 88.0,
+     "ph_level": 6.8,
+     "moisture": 80.0
+    },
+    {
+     "hours": 24,
+     "temperature": 22.0,
+     "humidity": 86.0,
+     "ph_level": 6.8,
+     "moisture": 80.0
+    },
+    {
+     "hours": 36,
+     "temperature": 22.0,
+     "humidity": 82.0,
+     "ph_level": 6.8,
+     "moisture": 80.0
+    }
+   ],
+   "expected": [
+    "humidity_deviation"
+   ]
+  },
+  {
+   "name": "a fall too slow to matter",
+   "crop": "Oyster Mushroom",
+   "readings": [
+    {
+     "hours": 0,
+     "temperature": 22.0,
+     "humidity": 93.5,
+     "ph_level": 6.8,
+     "moisture": 80.0
+    },
+    {
+     "hours": 12,
+     "temperature": 22.0,
+     "humidity": 93.0,
+     "ph_level": 6.8,
+     "moisture": 80.0
+    },
+    {
+     "hours": 24,
+     "temperature": 22.0,
+     "humidity": 92.5,
+     "ph_level": 6.8,
+     "moisture": 80.0
+    },
+    {
+     "hours": 36,
+     "temperature": 22.0,
+     "humidity": 92.0,
+     "ph_level": 6.8,
+     "moisture": 80.0
+    }
+   ],
+   "expected": []
+  },
+  {
+   "name": "a zigzag is not a trend",
+   "crop": "Oyster Mushroom",
+   "readings": [
+    {
+     "hours": 0,
+     "temperature": 22.0,
+     "humidity": 92.0,
+     "ph_level": 6.8,
+     "moisture": 80.0
+    },
+    {
+     "hours": 12,
+     "temperature": 22.0,
+     "humidity": 88.0,
+     "ph_level": 6.8,
+     "moisture": 80.0
+    },
+    {
+     "hours": 24,
+     "temperature": 22.0,
+     "humidity": 90.0,
+     "ph_level": 6.8,
+     "moisture": 80.0
+    },
+    {
+     "hours": 36,
+     "temperature": 22.0,
+     "humidity": 86.0,
+     "ph_level": 6.8,
+     "moisture": 80.0
+    }
+   ],
+   "expected": []
+  },
+  {
+   "name": "only three readings",
+   "crop": "Oyster Mushroom",
+   "readings": [
+    {
+     "hours": 0,
+     "temperature": 22.0,
+     "humidity": 92.0,
+     "ph_level": 6.8,
+     "moisture": 80.0
+    },
+    {
+     "hours": 12,
+     "temperature": 22.0,
+     "humidity": 90.6,
+     "ph_level": 6.8,
+     "moisture": 80.0
+    },
+    {
+     "hours": 24,
+     "temperature": 22.0,
+     "humidity": 89.2,
+     "ph_level": 6.8,
+     "moisture": 80.0
+    }
+   ],
+   "expected": []
+  },
+  {
+   "name": "the same reading is out of range for oyster",
+   "crop": "Oyster Mushroom",
+   "readings": [
+    {
+     "hours": 0,
+     "temperature": 15.0,
+     "humidity": 88,
+     "ph_level": 6.0,
+     "moisture": 60
+    }
+   ],
+   "expected": [
+    "moisture_level_critical",
+    "temperature_out_of_range"
+   ]
+  },
+  {
+   "name": "and fine for shiitake",
+   "crop": "Shiitake",
+   "readings": [
+    {
+     "hours": 0,
+     "temperature": 15.0,
+     "humidity": 88,
+     "ph_level": 6.0,
+     "moisture": 60
+    }
+   ],
+   "expected": []
+  },
+  {
+   "name": "an unrecognised crop uses the oyster ranges",
+   "crop": "Reishi",
+   "readings": [
+    {
+     "hours": 0,
+     "temperature": 22.0,
+     "humidity": 92.0,
+     "ph_level": 6.8,
+     "moisture": 80.0
+    },
+    {
+     "hours": 12,
+     "temperature": 22.0,
+     "humidity": 90.6,
+     "ph_level": 6.8,
+     "moisture": 80.0
+    },
+    {
+     "hours": 24,
+     "temperature": 22.0,
+     "humidity": 89.2,
+     "ph_level": 6.8,
+     "moisture": 80.0
+    },
+    {
+     "hours": 36,
+     "temperature": 22.0,
+     "humidity": 87.8,
+     "ph_level": 6.8,
+     "moisture": 80.0
+    }
+   ],
+   "expected": [
+    "humidity_trending_low"
+   ]
+  },
+  {
+   "name": "lion's mane temperature heading below its lower limit",
+   "crop": "Lion's Mane",
+   "readings": [
+    {
+     "hours": 0,
+     "temperature": 19.5,
+     "humidity": 90,
+     "ph_level": 6.0,
+     "moisture": 65
+    },
+    {
+     "hours": 12,
+     "temperature": 18.5,
+     "humidity": 90,
+     "ph_level": 6.0,
+     "moisture": 65
+    },
+    {
+     "hours": 24,
+     "temperature": 17.5,
+     "humidity": 90,
+     "ph_level": 6.0,
+     "moisture": 65
+    },
+    {
+     "hours": 36,
+     "temperature": 16.5,
+     "humidity": 90,
+     "ph_level": 6.0,
+     "moisture": 65
+    }
+   ],
+   "expected": [
+    "temperature_trending_low"
+   ]
+  },
+  {
+   "name": "the same falling temperatures are comfortably inside the shiitake range",
+   "crop": "Shiitake",
+   "readings": [
+    {
+     "hours": 0,
+     "temperature": 19.5,
+     "humidity": 85,
+     "ph_level": 6.0,
+     "moisture": 60
+    },
+    {
+     "hours": 12,
+     "temperature": 18.5,
+     "humidity": 85,
+     "ph_level": 6.0,
+     "moisture": 60
+    },
+    {
+     "hours": 24,
+     "temperature": 17.5,
+     "humidity": 85,
+     "ph_level": 6.0,
+     "moisture": 60
+    },
+    {
+     "hours": 36,
+     "temperature": 16.5,
+     "humidity": 85,
+     "ph_level": 6.0,
+     "moisture": 60
+    }
+   ],
+   "expected": []
+  },
+  {
+   "name": "two metrics trending at once",
+   "crop": "Oyster Mushroom",
+   "readings": [
+    {
+     "hours": 0,
+     "temperature": 22.0,
+     "humidity": 92.0,
+     "ph_level": 6.8,
+     "moisture": 80.0
+    },
+    {
+     "hours": 12,
+     "temperature": 22.8,
+     "humidity": 90.6,
+     "ph_level": 6.8,
+     "moisture": 80.0
+    },
+    {
+     "hours": 24,
+     "temperature": 23.6,
+     "humidity": 89.2,
+     "ph_level": 6.8,
+     "moisture": 80.0
+    },
+    {
+     "hours": 36,
+     "temperature": 24.4,
+     "humidity": 87.8,
+     "ph_level": 6.8,
+     "moisture": 80.0
+    }
+   ],
+   "expected": [
+    "humidity_trending_low",
+    "temperature_trending_high"
+   ]
+  },
+  {
+   "name": "a reading with only one metric",
+   "crop": "Oyster Mushroom",
+   "readings": [
+    {
+     "hours": 0,
+     "temperature": 22.0
+    }
+   ],
+   "expected": []
+  }
+ ]
+}
