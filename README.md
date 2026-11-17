@@ -110,9 +110,9 @@ erDiagram
 
 The tests were written to be able to fail: key behaviors were deliberately broken to confirm the right tests caught them, the unit tests pass on Node 22 and 25 and in three timezones, and they found real bugs, which are fixed. → [frontend/docs/testing.md](frontend/docs/testing.md)
 
-Every pull request runs: formatting, linting, type checks, migrations on a real PostgreSQL (plus a check that they match the models), the backend tests, the frontend unit tests with a coverage floor, the browser tests, and security scans (`npm audit` fails the build at high severity; Bandit and pip-audit are advisory).
+Every pull request runs: formatting, linting, type checks, migrations on a real PostgreSQL (plus a check that they match the models), the backend tests, the frontend unit tests with a coverage floor, the browser tests, and security scans (`npm audit` of the dependencies that ship to users fails the build at high severity; Bandit and pip-audit are advisory).
 
-Between pull requests, a **weekly scheduled audit** (`npm audit` and `pip-audit`) opens a GitHub issue if a vulnerable dependency appears, and Dependabot proposes the updates, grouped so keeping up is one quick review a week.
+Between pull requests, a **weekly scheduled audit** (`npm audit` of everything, build tools included, and `pip-audit`) opens a GitHub issue if a vulnerable dependency appears, and Dependabot proposes the updates, grouped so keeping up is one quick review a week.
 
 ## Run it locally
 
