@@ -47,7 +47,11 @@ test.describe('the assistant in demo mode', () => {
     await page.getByRole('button', { name: 'Ask' }).click()
 
     await expect(page.getByText(/^Recorded answer · /)).toHaveCount(2)
-    await expect(page.getByText('Tienes 2 lotes activos.')).toBeVisible()
+    // The second answer is about both active batches. (Its wording changes every time the
+    // recordings are made, so this checks a fact it must contain, not a sentence.)
+    await expect(
+      page.getByRole('log', { name: 'Conversation' }).getByText('Shiitake-Log-07').first(),
+    ).toBeVisible()
   })
 
   test('is honest that it cannot answer anything that was not recorded', async ({ page }) => {
