@@ -1,67 +1,67 @@
 {
-  "recorded_at": "2026-11-17T14:04:00+00:00",
+  "recorded_at": "2026-11-17T18:33:00+00:00",
   "model": "claude-haiku-5-5",
   "answers": [
     {
       "question": "Which of my batches need attention?",
-      "answer": "**Short answer:** None of your active batches currently need attention. One failed batch has out-of-range readings in its last record.\n\n**Active batches (both within the oyster default ranges)**\n- **Oyster-Block-01** (Greenhouse Room A): Latest reading 2026-11-17 14:04: 22.1 °C, 91.0 % humidity, pH 6.92, 82.7 % moisture. Humidity has been trending down, but it is still within range (85–95 %). Expected harvest: 2026-11-23.\n- **Shiitake-Log-07** (Cold Room B): Latest reading 2026-11-17 14:04: 21.6 °C, 87.6 % humidity, pH 6.54, 81.3 % moisture. All values are stable and within range. Expected harvest: 2026-11-29.\n\n**Failed batch (flagged)**\n- **KingOyster-Trial-02** (Tent C): Status is FAILED. Its last reading, from 2026-10-28 14:04, was 30.7 °C (too high), 65.0 % humidity (too low) and 70.7 % moisture (too low). The batch notes record a ventilation fault and green mould on day 12 from contaminated substrate. Because the batch has failed, this is a record of the problem rather than a live alert, but you may want to check that Tent C's ventilation has been fixed before using it again.\n\n**Other batches**\n- **LionsMane-Bag-03** (COMPLETED, Greenhouse Room A): last reading 2026-10-16, all values within range.\n- **Reishi-Archive-2025** (ARCHIVED, Storage Shelf 2): last reading 2026-08-09, not reviewed further.\n\nThe safe ranges I used are fixed defaults for oyster mushrooms. I applied them to the King Oyster batch, and they are not tailored to that species.",
+      "answer": "**Short answer:** Nothing in your active batches is out of range right now. The one batch with current problems is KingOyster-Trial-02, which has already failed.\n\n**Needs attention**\n- **KingOyster-Trial-02 (Tent C, status FAILED):** The last reading on 2026-10-28 was out of range: temperature 30.7 °C (safe 20–25), humidity 65.0% (safe 85–95), moisture 70.7% (safe 75–90). The batch notes record green mould on day 12 from contaminated substrate and a ventilation fault. The ranges used are the oyster ranges, so this comparison is rough for King Oyster. No readings have come in since 28 October.\n\n**Active batches, within range**\n- **Shiitake-Log-07 (Cold Room B):** Latest reading on 2026-11-17: 15.6 °C, 84.6% humidity, pH 6.04, 61.3% moisture. All stable over 17 readings. Expected harvest 2026-11-29.\n- **Oyster-Block-01 (Greenhouse Room A):** Latest reading on 2026-11-17: 22.1 °C, 87.3% humidity, pH 6.92, 82.7% moisture. Temperature, pH and moisture are stable. Humidity is trending downward and is only about 2 points above the 85% minimum, so it is worth watching. Expected harvest 2026-11-23.\n\n**Not active**\n- **LionsMane-Bag-03** (completed) last reading 2026-10-16: all values within the lion's mane ranges I can see in the tool data.\n\nHmm, I need to correct that last point: the tool did not return thresholds for Lion's Mane, so I can't say whether its last reading was in range. I only have its latest reading (16.9 °C, 91.0% humidity, pH 6.13, 66.3% moisture, on 2026-10-16).\n\n- **Reishi-Archive-2025** (archived) last reading 2026-08-09.",
       "tools": [
         "list_batches",
         "get_batch_summary",
         "get_batch_summary",
         "get_batch_summary"
       ],
-      "input_tokens": 8267,
-      "output_tokens": 1249
+      "input_tokens": 8332,
+      "output_tokens": 1465
     },
     {
       "question": "How is Oyster-Block-01 doing?",
-      "answer": "**Oyster-Block-01** is active and within the safe ranges as of the latest reading.\n\n**Latest reading (2026-11-17 14:04):**\n- Temperature: 22.1 °C (range 20–25 °C)\n- Humidity: 91.0 % (range 85–95 %)\n- pH: 6.92 (range 6.0–7.5)\n- Moisture: 82.7 % (range 75–90 %)\n\n**Over its 17 readings:**\n- Averages: 22.32 °C, 89.4 % humidity, pH 6.81, 81.79 % moisture\n- Trends: temperature, pH and moisture are stable. Humidity is decreasing, though the latest value is still inside the range.\n- No current issues.\n\n**Batch details:** Greenhouse Room A, started 2026-10-30, expected harvest 2026-11-23. The batch note says it was inoculated on rye grain substrate and fruiting is expected next week.\n\nThe thresholds are fixed defaults for oyster mushrooms, which is the species of this batch, so they apply directly.",
+      "answer": "**Oyster-Block-01** is active in Greenhouse Room A and currently **within its safe ranges**, with no open issues.\n\n**Latest reading (2026-11-17 18:33):**\n- Temperature: 22.1 °C (range 20–25 °C)\n- Humidity: 87.3% (range 85–95%)\n- pH: 6.92 (range 6.0–7.5)\n- Moisture: 82.7% (range 75–90%)\n\n**Trends over 17 readings:**\n- Temperature, pH and moisture are stable. Averages were 22.32 °C, pH 6.81 and 81.79%.\n- Humidity is decreasing. The average was 89.22%, and the latest 87.3% is getting closer to the 85% lower limit, so it is worth watching.\n\n**Timeline:** Started 2026-10-30, expected harvest 2026-11-23 (about 6 days from now).\n\nThe ranges come from the tool's oyster guide values. They are approximate and not specific to your strain or room, so treat the comparison as a rough guide.",
       "tools": [
         "list_batches",
         "get_batch_summary"
       ],
-      "input_tokens": 6749,
-      "output_tokens": 577
+      "input_tokens": 6815,
+      "output_tokens": 629
     },
     {
       "question": "Compare the average temperature of my active batches.",
-      "answer": "Your two active batches have similar average temperatures. Oyster-Block-01 is about 1.5 °C warmer.\n\n| Batch | Crop | Location | Avg. temperature (17 readings) | Latest reading (2026-11-17 14:04) | Trend |\n|---|---|---|---|---|---|\n| Oyster-Block-01 | Oyster Mushroom | Greenhouse Room A | 22.32 °C | 22.1 °C | Stable |\n| Shiitake-Log-07 | Shiitake | Cold Room B | 20.86 °C | 21.6 °C | Stable |\n\nBoth averages fall within the 20–25 °C safe range. That range is a fixed default for oyster mushrooms, so it is only a rough reference for the shiitake batch.",
+      "answer": "Across your two active batches, the average temperature over their recent readings is about **18.6 °C**.\n\n| Batch | Crop | Avg temp (17 readings) | Latest (2026-11-17 18:33) | Safe range | Trend |\n|---|---|---|---|---|---|\n| Shiitake-Log-07 (Cold Room B) | Shiitake | 14.86 °C | 15.6 °C | 12.0–18.0 °C | Stable |\n| Oyster-Block-01 (Greenhouse Room A) | Oyster Mushroom | 22.32 °C | 22.1 °C | 20.0–25.0 °C | Stable |\n\nBoth batches are within their safe temperature ranges, and the tool reports no current issues for either. Oyster-Block-01 is about 7.5 °C warmer than Shiitake-Log-07, so the two batches are kept at very different temperatures.",
       "tools": [
         "list_batches",
         "get_batch_summary",
         "get_batch_summary"
       ],
-      "input_tokens": 6287,
-      "output_tokens": 598
+      "input_tokens": 6478,
+      "output_tokens": 729
     },
     {
       "question": "Why did KingOyster-Trial-02 fail?",
-      "answer": "KingOyster-Trial-02 (Tent C) is marked FAILED. The records don't include a formal failure cause, but two notes were logged:\n\n- **Green mould on day 12**, attributed to contaminated substrate.\n- **Ventilation fault**, noted on the latest reading, with readings out of range.\n\nThe readings support the ventilation note. The batch started 2026-10-08 and the last reading was 2026-10-28 14:04:\n- Temperature rose over the batch and was 30.7 °C at the end (safe range 20–25 °C). The average was 25.16 °C.\n- Humidity fell and was 65.0% at the end (safe range 85–95%).\n- Moisture was 70.7% (safe range 75–90%), below range.\n- pH was 7.49, within the 6.0–7.5 range, and stable.\n\nThe safe ranges are fixed defaults for oyster mushrooms. King oyster is an oyster species, so they are a reasonable reference, but they are not specific to this batch.\n\nI can't confirm the root cause from the data. For a definitive explanation, check the batch records with the grower or a mycology expert.",
+      "answer": "The system doesn't record a formal failure reason for KingOyster-Trial-02. The batch is marked FAILED, and two notes written by the user describe what went wrong:\n\n- **Green mould on day 12, attributed to contaminated substrate.** This is the user's note. I can't verify it from the readings.\n- **A ventilation fault.** This is also from a user note, on the latest reading.\n\nThe readings support the ventilation note. The latest reading (2026-10-28 18:33, Tent C) was out of range:\n- Temperature: 30.7 °C (guide range 20–25 °C)\n- Humidity: 65.0% (guide range 85–95%)\n- Moisture: 70.7% (guide range 75–90%)\n- pH: 7.49 (within the 6.0–7.5 guide range)\n\nOver the batch, temperature trended upward and humidity trended downward. The averages were 25.2 °C, 76.7% humidity, pH 7.43 and 70.2% moisture, across 8 readings.\n\nThese ranges are approximate oyster guide values, not figures for this specific strain or room, so the comparison is rough. The batch's last recorded reading is 2026-10-28, and its expected harvest date was the same day.",
       "tools": [
         "list_batches",
         "get_batch_summary"
       ],
-      "input_tokens": 6872,
-      "output_tokens": 659
+      "input_tokens": 5628,
+      "output_tokens": 879
     },
     {
       "question": "¿Cómo van mis lotes activos?",
-      "answer": "Tienes 2 lotes activos. Ambos están dentro de los rangos seguros, sin incidencias abiertas.\n\n**Shiitake-Log-07** (Cold Room B)\n- Última lectura (17-nov 14:04): 21,6 °C, humedad 87,6 %, pH 6,54, humedad del sustrato 81,3 %.\n- Promedios de 17 lecturas: 20,86 °C, 87,83 %, pH 6,51, 80,69 %.\n- Tendencias estables en todos los parámetros.\n- Cosecha prevista: 29-nov-2026.\n\n**Oyster-Block-01** (Greenhouse Room A)\n- Última lectura (17-nov 14:04): 22,1 °C, humedad 91,0 %, pH 6,92, humedad del sustrato 82,7 %.\n- Promedios de 17 lecturas: 22,32 °C, 89,4 %, pH 6,81, 81,79 %.\n- La humedad ambiental muestra tendencia a la baja, aunque el valor actual sigue dentro del rango.\n- Cosecha prevista: 23-nov-2026.\n\nLos rangos usados son los valores fijos por defecto para setas ostra (temperatura 20–25 °C, humedad 85–95 %, pH 6,0–7,5, humedad del sustrato 75–90 %). Para el shiitake son una referencia aproximada, no un rango específico para esa especie.",
+      "answer": "Tienes 2 lotes activos. Los dos están dentro de los rangos seguros según sus últimas lecturas (2026-11-17 18:33).\n\n**Shiitake-Log-07** (Cold Room B)\n- Última lectura: temperatura 15.6 °C, humedad 84.6 %, pH 6.04, humedad del sustrato 61.3 %.\n- Rangos usados: temperatura 12–18 °C, humedad 80–90 %, pH 5.5–6.5, sustrato 55–65 %.\n- Tendencias estables en las cuatro variables. Promedios de las 17 lecturas: 14.86 °C, 84.83 %, pH 6.01, 60.69 %.\n- Cosecha esperada: 2026-11-29.\n\n**Oyster-Block-01** (Greenhouse Room A)\n- Última lectura: temperatura 22.1 °C, humedad 87.3 %, pH 6.92, humedad del sustrato 82.7 %.\n- Rangos usados: temperatura 20–25 °C, humedad 85–95 %, pH 6.0–7.5, sustrato 75–90 %.\n- La humedad ambiente va en descenso (promedio de 89.22 %, última lectura 87.3 %), aunque sigue dentro del rango. Temperatura, pH y sustrato estables.\n- Cosecha esperada: 2026-11-23.\n\nSi quieres, puedo revisar las lecturas recientes de cualquiera de los dos lotes para ver la evolución de la humedad del Oyster-Block-01.",
       "tools": [
         "list_batches",
         "get_batch_summary",
         "get_batch_summary"
       ],
-      "input_tokens": 6316,
-      "output_tokens": 885
+      "input_tokens": 6374,
+      "output_tokens": 911
     },
     {
       "question": "Add a reading of 23 °C to Oyster-Block-01.",
-      "answer": "I can't add readings. I only have read-only access to batch data, so I can't record the 23 °C value for Oyster-Block-01. You'll need to enter it through the MycoTrack app or another channel your organization uses.\n\nI can look up Oyster-Block-01's latest readings or summary if you want to check the current state.",
+      "answer": "I can't add readings. My tools only let me view batches, their summaries, and recent readings. To record a 23 °C reading for Oyster-Block-01, you'll need to use the MycoTrack app or whatever system you normally log readings in.\n\nI can still check Oyster-Block-01's current summary or recent readings if that would help.",
       "tools": [],
-      "input_tokens": 1427,
-      "output_tokens": 174
+      "input_tokens": 1446,
+      "output_tokens": 180
     }
   ]
 }

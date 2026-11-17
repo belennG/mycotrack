@@ -1,5 +1,5 @@
 import { expect, test, type Page } from '@playwright/test'
-import { openOysterBatch, startDemo } from './helpers'
+import { batchCard, openOysterBatch, startDemo } from './helpers'
 
 /** The count badge next to a status column's heading. */
 const columnCount = (page: Page, status: string) =>
@@ -28,7 +28,7 @@ test.describe('the dashboard', () => {
   })
 
   test('shows the latest reading on each batch card', async ({ page }) => {
-    const oyster = page.getByText('Oyster-Block-01').locator('..')
+    const oyster = batchCard(page, 'Oyster-Block-01')
 
     await expect(oyster.getByText('Latest Log')).toBeVisible()
     await expect(oyster.getByText(/🌡️ [\d.]+ °C/)).toBeVisible()

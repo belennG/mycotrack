@@ -1,5 +1,12 @@
 import { expect, test } from '@playwright/test'
-import { addReading, openOysterBatch, readingHeadings, readingTexts, startDemo } from './helpers'
+import {
+  addReading,
+  batchCard,
+  openOysterBatch,
+  readingHeadings,
+  readingTexts,
+  startDemo,
+} from './helpers'
 
 test.beforeEach(async ({ page }) => {
   await startDemo(page)
@@ -62,7 +69,7 @@ test.describe('readings with a time of day', () => {
 
     await page.getByRole('link', { name: 'Dashboard' }).click()
 
-    const oyster = page.getByText('Oyster-Block-01').locator('..')
+    const oyster = batchCard(page, 'Oyster-Block-01')
     await expect(oyster.getByText('🌡️ 31.5 °C')).toBeVisible()
     await expect(oyster.getByText('🌡️ 17.5 °C')).toHaveCount(0)
   })

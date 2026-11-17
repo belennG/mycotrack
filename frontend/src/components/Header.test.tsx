@@ -5,7 +5,7 @@ import { http, HttpResponse } from 'msw'
 import Header from './Header'
 import { renderWithProviders } from '../test/renderWithProviders'
 import { server } from '../test/msw/server'
-import { API, meFixture } from '../test/msw/handlers'
+import { API, alertFixture, meFixture } from '../test/msw/handlers'
 
 describe('Header: theme', () => {
   it('toggles dark mode on the page and remembers it', async () => {
@@ -43,6 +43,27 @@ describe('Header: navigation', () => {
       'href',
       '/assistant',
     )
+  })
+})
+
+describe('Header: alerts', () => {
+  it('links to the alerts page without a count when nothing is open', async () => {
+    renderWithProviders(<Header />)
+
+    const link = screen.getByRole('link', { name: 'Alerts', hidden: true })
+    expect(link).toHaveAttribute('href', '/alerts')
+    expect(link).not.toHaveTextContent(/\d/)
+  })
+
+  it('shows how many alerts are open', async () => {
+    server.use(
+      http.get(`${API}/v1/alerts`, () =>
+        HttpResponse.json({ total: 3, items: [alertFixture(), alertFixture(), alertFixture()] }),
+      ),
+    )
+    renderWithProviders(<Header />)
+
+    expect(await screen.findByLabelText('3 open')).toHaveTextContent('3')
   })
 })
 

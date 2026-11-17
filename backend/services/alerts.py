@@ -24,6 +24,7 @@ __all__ = [
     "DEFAULT_THRESHOLDS",
     "generate_alerts",
     "detect_trend_alerts",
+    "evaluate_alerts",
     "record_alerts",
 ]
 
@@ -174,6 +175,27 @@ def detect_trend_alerts(
     return alerts
 
 
+def evaluate_alerts(
+    readings: Sequence[Tracking], crop_type: str | None
+) -> List[Dict[str, Any]]:
+    """Every alert the rules raise for these readings of a batch of this crop.
+
+    Pure: nothing is read or written. Missing-data notices are left out, because a reading
+    with only some of the metrics is normal. The in-browser demo has a TypeScript copy of this
+    (``frontend/src/demo/alertRules.ts``); ``tests/alert_cases.json`` keeps the two in step.
+    """
+    if not readings:
+        return []
+    thresholds = thresholds_for(crop_type)
+    latest = max(readings, key=lambda reading: _naive_utc(reading.tracking_date))
+    found = [
+        alert
+        for alert in generate_alerts(latest, thresholds)
+        if alert["alert_type"] != "missing_data"
+    ]
+    return found + detect_trend_alerts(readings, thresholds)
+
+
 def record_alerts(
     db: Session, batch: Batch, now: datetime | None = None
 ) -> List[Alert]:
@@ -194,13 +216,7 @@ def record_alerts(
     if not readings:
         return []
 
-    thresholds = thresholds_for(batch.crop_type)
-    candidates = [
-        alert
-        for alert in generate_alerts(readings[0], thresholds)
-        if alert["alert_type"] != "missing_data"
-    ]
-    candidates += detect_trend_alerts(readings, thresholds)
+    candidates = evaluate_alerts(readings, batch.crop_type)
 
     open_types = {
         alert_type

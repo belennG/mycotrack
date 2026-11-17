@@ -9,8 +9,9 @@ explainable. **No model decides whether an alert is raised.**
 | --- | --- |
 | Safe ranges by crop type | Done |
 | Threshold and trend rules, alerts saved when a reading is saved | Done |
-| Alerts page and Dashboard marker in the app | Next |
-| The assistant explaining an alert that has fired | Planned |
+| Alerts page, header count, Dashboard marker, acknowledging an alert | Done |
+| The assistant judging each batch by its crop's ranges | Done |
+| The assistant knowing about, and explaining, the alerts that have fired | Next |
 | Email | Planned |
 
 ## Safe ranges by crop type
@@ -40,3 +41,14 @@ them.
   no reading arrives to trigger the check.
 - Alerts are not resolved automatically when a batch goes back in range; they are acknowledged
   by a person.
+
+## In the app and in the demo
+
+The Alerts page lists open alerts (and, on another tab, acknowledged ones). The header shows how
+many are open and each batch card on the Dashboard shows its own count: red when any of them is
+already out of range, orange when it is only heading there.
+
+The demo has no backend, so `frontend/src/demo/alertRules.ts` is a TypeScript copy of the rules.
+Two copies of rules can drift, so both are run against the same cases in
+`backend/tests/alert_cases.json` (`test_alert_cases.py` and `alertRules.test.ts`): change a rule
+in one place and the other suite fails until it is changed too.

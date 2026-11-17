@@ -103,5 +103,7 @@ a signed-in account, with per-user rate limits and a spend cap set in the Anthro
 ## Not yet / next
 
 1. Writing readings from natural language, with explicit confirmation.
-2. Alerts: deterministic threshold and trend rules that create alerts (the `alerts` table is never
-   written today); the agent would only *explain* an alert that already fired, and the code sends it.
+2. Alerts: the rules and the Alerts page exist (see [alerts.md](alerts.md)). Still to do: a
+   read-only tool so the assistant can see and explain the alerts that have fired (today it does not
+   know about them), and sending them by email. The agent only *explains* an alert that already
+   fired; the code decides and sends.

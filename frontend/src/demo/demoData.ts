@@ -1,9 +1,11 @@
 import type { Batch, BatchStatus } from '../types/batch'
 import type { Tracking } from '../types/tracking'
+import type { Alert } from '../types/alert'
 
 export interface DemoDb {
   batches: Batch[]
   trackings: Tracking[]
+  alerts: Alert[]
 }
 
 const DAY = 24 * 60 * 60 * 1000
@@ -33,6 +35,8 @@ interface BatchSeed {
   base: { temperature: number; humidity: number; ph_level: number; moisture: number }
   // Index (days ago) of a reading pushed out of range, to show alerts-worthy data
   excursionDaysAgo?: number
+  // Humidity of the latest readings, oldest first: a steady fall, to show a trend alert
+  humidityTail?: number[]
 }
 
 const SEEDS: BatchSeed[] = [
@@ -47,6 +51,7 @@ const SEEDS: BatchSeed[] = [
     trackingDays: 14,
     base: { temperature: 22.5, humidity: 90, ph_level: 6.8, moisture: 82 },
     excursionDaysAgo: 4,
+    humidityTail: [91.2, 89.9, 88.6, 87.3],
   },
   {
     batch_name: 'Shiitake-Log-07',
@@ -57,7 +62,7 @@ const SEEDS: BatchSeed[] = [
     startedDaysAgo: 30,
     harvestInDays: 12,
     trackingDays: 14,
-    base: { temperature: 21, humidity: 88, ph_level: 6.5, moisture: 80 },
+    base: { temperature: 15, humidity: 85, ph_level: 6, moisture: 60 },
   },
   {
     batch_name: 'LionsMane-Bag-03',
@@ -68,7 +73,7 @@ const SEEDS: BatchSeed[] = [
     startedDaysAgo: 52,
     harvestInDays: -10,
     trackingDays: 10,
-    base: { temperature: 23, humidity: 91, ph_level: 6.9, moisture: 84 },
+    base: { temperature: 17.5, humidity: 90, ph_level: 6, moisture: 65 },
   },
   {
     batch_name: 'KingOyster-Trial-02',
@@ -91,13 +96,16 @@ const SEEDS: BatchSeed[] = [
     startedDaysAgo: 120,
     harvestInDays: -60,
     trackingDays: 6,
-    base: { temperature: 25, humidity: 86, ph_level: 6.2, moisture: 78 },
+    base: { temperature: 23, humidity: 90, ph_level: 6.2, moisture: 78 },
   },
 ]
 
 const round = (n: number, digits = 1) => Number(n.toFixed(digits))
 
-export function createSeed(): DemoDb {
+/** The batches and readings of the sample data. (Its alerts are worked out from them.) */
+export type Seed = Pick<DemoDb, 'batches' | 'trackings'>
+
+export function createSeed(): Seed {
   const now = Date.now()
   const rand = mulberry32(20260907)
   const batches: Batch[] = []
@@ -169,6 +177,18 @@ export function createSeed(): DemoDb {
         updated_at: date.toISOString(),
       })
     }
+  })
+
+  // A steady fall in humidity over the latest readings of the batches that ask for it.
+  SEEDS.forEach((seed, batchIndex) => {
+    if (!seed.humidityTail) return
+    const latest = trackings
+      .filter((t) => t.batch_id === `demo-batch-${batchIndex + 1}`)
+      .sort((a, b) => a.tracking_date.localeCompare(b.tracking_date))
+      .slice(-seed.humidityTail.length)
+    latest.forEach((tracking, i) => {
+      tracking.humidity = seed.humidityTail![i]
+    })
   })
 
   return { batches, trackings }

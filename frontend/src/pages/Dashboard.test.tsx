@@ -6,7 +6,7 @@ import { Route, Routes, useParams } from 'react-router-dom'
 import Dashboard from './Dashboard'
 import { renderWithProviders } from '../test/renderWithProviders'
 import { server } from '../test/msw/server'
-import { API, batchFixture, trackingFixture } from '../test/msw/handlers'
+import { API, alertFixture, batchFixture, trackingFixture } from '../test/msw/handlers'
 import type { DashboardBatch, DashboardResponse } from '../types/batch'
 
 const dashboardBatch = (over: Partial<DashboardBatch> = {}): DashboardBatch => ({
@@ -134,5 +134,45 @@ describe('Dashboard', () => {
     await screen.findByText('Oyster-Block-01')
     const header = screen.getByRole('heading', { name: 'Cultivation Dashboard' }).parentElement!
     expect(within(header).getByRole('button', { name: /create new tracking/i })).toBeInTheDocument()
+  })
+
+  it('marks the batches that have open alerts', async () => {
+    serve(
+      dashboard({
+        ACTIVE: [
+          dashboardBatch({ id: 'b1', batch_name: 'Oyster-Block-01' }),
+          dashboardBatch({ id: 'b2', batch_name: 'Shiitake-Log-07' }),
+          dashboardBatch({ id: 'b3', batch_name: 'Quiet-Batch' }),
+        ],
+      }),
+    )
+    server.use(
+      http.get(`${API}/v1/alerts`, () =>
+        HttpResponse.json({
+          total: 3,
+          items: [
+            alertFixture({ id: 'a1', batch_id: 'b1', severity: 'warning' }),
+            alertFixture({ id: 'a2', batch_id: 'b2', severity: 'critical' }),
+            alertFixture({ id: 'a3', batch_id: 'b2', severity: 'warning' }),
+          ],
+        }),
+      ),
+    )
+    renderWithProviders(app, { route: '/dashboard' })
+
+    const card = (name: string) => screen.getByText(name).closest('div')!.parentElement!
+    expect(await screen.findByText('⚠ 1 alert')).toBeVisible()
+    expect(within(card('Oyster-Block-01')).getByText('⚠ 1 alert')).toBeVisible()
+    expect(within(card('Shiitake-Log-07')).getByText('⚠ 2 alerts')).toBeVisible()
+    expect(within(card('Quiet-Batch')).queryByText(/alert/)).not.toBeInTheDocument()
+    // Red when any open alert is already out of range, orange when it is only heading there.
+    expect(within(card('Oyster-Block-01')).getByText('⚠ 1 alert')).toHaveAttribute(
+      'data-severity',
+      'warning',
+    )
+    expect(within(card('Shiitake-Log-07')).getByText('⚠ 2 alerts')).toHaveAttribute(
+      'data-severity',
+      'critical',
+    )
   })
 })

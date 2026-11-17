@@ -28,7 +28,8 @@ from agent.sanitize import clean, wrap_note
 from auth.tenancy import OrgContext
 from models.batch import Batch
 from models.tracking import Tracking
-from services.alerts import DEFAULT_THRESHOLDS, generate_alerts
+from services.alerts import generate_alerts
+from services.thresholds import preset_for
 from services.analytics import analyze_trends, calculate_averages
 
 logger = logging.getLogger(__name__)
@@ -167,7 +168,8 @@ def _get_batch_summary(args: BatchIdInput, ctx: OrgContext, db: Session) -> dict
         summary["health"] = "No readings recorded yet."
         return summary
 
-    issues = generate_alerts(readings[0])
+    preset, thresholds = preset_for(batch.crop_type)
+    issues = generate_alerts(readings[0], thresholds)
     summary.update(
         {
             "averages": calculate_averages(readings),
@@ -175,9 +177,13 @@ def _get_batch_summary(args: BatchIdInput, ctx: OrgContext, db: Session) -> dict
             "latest_reading": _reading(readings[0]),
             "health": "Needs attention" if issues else "Within range",
             "current_issues": [issue["message"] for issue in issues],
-            "thresholds_used": DEFAULT_THRESHOLDS,
+            "thresholds_used": thresholds,
             "thresholds_note": (
-                "Fixed defaults for oyster mushrooms, not specific to this batch's species."
+                f"Safe ranges for this batch's crop type ({preset}). They are approximate "
+                "guide values, not advice for a particular strain or room."
+                if not preset.startswith("default")
+                else "This crop type has no ranges of its own, so the oyster mushroom ranges "
+                "are used as a default; treat the comparison as rough."
             ),
         }
     )
