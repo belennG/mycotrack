@@ -6,6 +6,7 @@ import {
 } from 'axios'
 import type { Batch, BatchStatus, DashboardBatch, DashboardResponse } from '../types/batch'
 import type { Tracking } from '../types/tracking'
+import { replayAssistant } from './assistantReplay'
 import { createSeed, type DemoDb } from './demoData'
 
 /**
@@ -108,6 +109,12 @@ function route(config: InternalAxiosRequestConfig): AxiosResponse {
       organization,
       organizations: [organization],
     })
+  }
+
+  // ---- assistant (recorded answers, never a live model) ------------------
+  if (path === '/v1/assistant/ask' && method === 'post') {
+    const { question } = body<{ question?: string }>(config)
+    return respond(config, 200, replayAssistant(question ?? ''))
   }
 
   // ---- batches ----------------------------------------------------------

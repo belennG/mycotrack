@@ -11,11 +11,12 @@ and the real ``anthropic.Anthropic`` client can be dropped in without changing t
 """
 
 from dataclasses import dataclass, field
+from datetime import datetime, timezone
 from typing import Any, Protocol
 
 from sqlalchemy.orm import Session
 
-from agent.prompts import SYSTEM_PROMPT
+from agent.prompts import build_system_prompt
 from agent.tools import run_tool, tool_schemas
 from auth.tenancy import OrgContext
 
@@ -70,6 +71,7 @@ def run_agent(
     history: list[dict] | None = None,
     model: str = DEFAULT_MODEL,
     max_turns: int = MAX_TURNS,
+    now: datetime | None = None,
 ) -> AgentResult:
     """Answer *question*. *history* is earlier question/answer text from the conversation.
 
@@ -85,6 +87,7 @@ def run_agent(
         )
 
     tools = tool_schemas()
+    system = build_system_prompt(now or datetime.now(timezone.utc))
     messages: list[dict] = [*(history or []), {"role": "user", "content": question}]
     result = AgentResult(answer="", completed=False, turns=0)
 
@@ -92,7 +95,7 @@ def run_agent(
         response = client.messages.create(
             model=model,
             max_tokens=MAX_TOKENS,
-            system=SYSTEM_PROMPT,
+            system=system,
             tools=tools,
             messages=messages,
         )
