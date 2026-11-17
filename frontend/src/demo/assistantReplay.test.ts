@@ -1,5 +1,6 @@
 import { describe, expect, it } from 'vitest'
 import { createSeed } from './demoData'
+import { seedAlerts } from './demoAlerts'
 import { NO_RECORDING_ANSWER, replayAssistant, SUGGESTED_QUESTIONS } from './assistantReplay'
 
 /** Average of one batch's readings for a metric, rounded like the backend does (2 places). */
@@ -78,5 +79,18 @@ describe('the recordings match the demo sample data', () => {
 
     expect(answer).toContain(average('Oyster-Block-01', 'temperature'))
     expect(answer).toContain(average('Shiitake-Log-07', 'temperature'))
+  })
+
+  it('explain an alert that the sample data really raises', () => {
+    const seed = createSeed()
+    const batch = seed.batches.find((b) => b.batch_name === 'Oyster-Block-01')!
+    const raised = seedAlerts(seed.batches, seed.trackings).filter((a) => a.batch_id === batch.id)
+    expect(raised.map((a) => a.alert_type)).toEqual(['humidity_trending_low'])
+
+    const reply = replayAssistant('Why is there an alert on Oyster-Block-01?')
+
+    expect(reply.tool_calls.map((c) => c.name)).toContain('list_alerts')
+    expect(reply.answer).toContain('humidity_trending_low')
+    expect(reply.answer).toContain('87.3')
   })
 })

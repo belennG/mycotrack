@@ -104,7 +104,7 @@ erDiagram
 
 | Level | What | How |
 | --- | --- | --- |
-| **Backend** | 165 tests: token validation, first-login provisioning, tenant isolation, roles, time-of-day handling, the assistant (tools, loop, endpoint, rate limits), alert rules (thresholds by crop, trends) | pytest on an in-memory database; the model is scripted, so no API key or cost |
+| **Backend** | 175 tests: token validation, first-login provisioning, tenant isolation, roles, time-of-day handling, the assistant (tools, loop, endpoint, rate limits), alert rules (thresholds by crop, trends) | pytest on an in-memory database; the model is scripted, so no API key or cost |
 | **Frontend unit and component** | 161 tests, ~86% line coverage, enforced in CI | Vitest, Testing Library, MSW. Any API call without a mock **fails the test** |
 | **End to end** | 34 browser tests: access, dashboard, readings, batches, assistant, dark mode | Playwright against the production build |
 

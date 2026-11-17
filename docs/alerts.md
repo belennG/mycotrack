@@ -11,8 +11,8 @@ explainable. **No model decides whether an alert is raised.**
 | Threshold and trend rules, alerts saved when a reading is saved | Done |
 | Alerts page, header count, Dashboard marker, acknowledging an alert | Done |
 | The assistant judging each batch by its crop's ranges | Done |
-| The assistant knowing about, and explaining, the alerts that have fired | Next |
-| Email | Planned |
+| The assistant reading and explaining the alerts that have fired (`list_alerts`, read-only) | Done |
+| Email | Next |
 
 ## Safe ranges by crop type
 
