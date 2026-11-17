@@ -43,12 +43,13 @@ jobs:
       with:
         python-version: ${{ matrix.python-version }}
         cache: 'pip' # Speeds up future runs
+        cache-dependency-path: backend/requirements-dev.txt
 
-    # Install the requirements
+    # Install the requirements: the runtime packages plus the development tools
     - name: Install Dependencies
       run: |
         python -m pip install --upgrade pip
-        pip install -r backend/requirements.txt
+        pip install -r backend/requirements-dev.txt
 
     # Formatting & Linting
     - name: Check Code Formatting (Black)
@@ -64,8 +65,10 @@ jobs:
     - name: Security Scan (Bandit)
       run: bandit -r backend || true # || true prevents failure if we don't have a config yet
 
-    - name: Dependency Vulnerability Check (Safety)
-      run: safety check -r backend/requirements.txt || true # || true to warn instead of failing immediately
+    # Advisory here (pip-audit has no severity levels, and a new advisory should not block an
+    # unrelated change). The weekly Security audit workflow is what raises the alarm.
+    - name: Dependency Vulnerability Check (pip-audit)
+      run: pip-audit -r backend/requirements.txt --no-deps --disable-pip || true
 
     - name: Run Database Migrations
       env:

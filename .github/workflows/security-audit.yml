@@ -42,13 +42,14 @@ jobs:
         with:
           python-version: "3.13"
 
-      # requirements.txt is a full pinned freeze, so the audit needs no dependency resolution.
+      # Both requirements files are fully pinned lock files, so no dependency resolution is needed.
+      # The development file includes the runtime packages, so auditing it covers both.
       - name: Audit the backend (pip-audit)
         id: pip
         continue-on-error: true
         run: |
           pip install --quiet pip-audit==2.10.1
-          pip-audit -r backend/requirements.txt --no-deps --disable-pip 2>&1 | tee pip-audit.txt
+          pip-audit -r backend/requirements-dev.txt --no-deps --disable-pip 2>&1 | tee pip-audit.txt
 
       - name: Open, update or close the issue
         env:

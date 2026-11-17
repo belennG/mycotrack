@@ -1,0 +1,15 @@
+# Everything needed to develop and test, on top of the runtime dependencies. requirements-dev.txt
+# is generated from this file (see the header there) and also contains the runtime packages, so
+# one `pip install -r requirements-dev.txt` sets up a development environment.
+-r requirements.in
+-c requirements.txt
+
+pytest
+pytest-cov
+httpx2    # the test client (tests/conftest.py)
+black
+flake8
+mypy
+bandit
+pre-commit
+pip-audit
