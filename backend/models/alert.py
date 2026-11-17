@@ -31,3 +31,8 @@ class Alert(BaseModel):
     )
 
     batch: Mapped["Batch"] = relationship("Batch")
+
+    @property
+    def batch_name(self) -> str:
+        """Shown next to the alert, so a list does not need a second request per batch."""
+        return self.batch.batch_name

@@ -325,3 +325,40 @@ def test_a_viewer_cannot_create_readings_so_cannot_raise_alerts(client, make):
 
 def db_count(make):
     return make.db.query(Alert).count()
+
+
+# --- listing alerts -----------------------------------------------------------------------
+
+
+def test_the_list_shows_the_batch_name_and_filters_by_acknowledgement(client, make):
+    user, org = make.member("grower@example.com")
+    batch = make.batch(org, "Oyster-Block-01")
+    open_alert = make.alert(batch)
+    done = make.alert(batch)
+    done.is_acknowledged = True
+    make.db.commit()
+
+    everything = client.get("/api/v1/alerts/", headers=as_user(user)).json()
+    only_open = client.get(
+        "/api/v1/alerts/?is_acknowledged=false", headers=as_user(user)
+    ).json()
+    only_done = client.get(
+        "/api/v1/alerts/?is_acknowledged=true", headers=as_user(user)
+    ).json()
+
+    assert everything["total"] == 2
+    assert {a["batch_name"] for a in everything["items"]} == {"Oyster-Block-01"}
+    assert [a["id"] for a in only_open["items"]] == [str(open_alert.id)]
+    assert [a["id"] for a in only_done["items"]] == [str(done.id)]
+
+
+def test_the_list_limit_is_bounded(client, make):
+    user, _ = make.member("grower@example.com")
+
+    assert (
+        client.get("/api/v1/alerts/?limit=101", headers=as_user(user)).status_code
+        == 422
+    )
+    assert (
+        client.get("/api/v1/alerts/?limit=0", headers=as_user(user)).status_code == 422
+    )

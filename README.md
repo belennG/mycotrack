@@ -26,7 +26,8 @@ One click, no account needed: it opens straight into the app on sample data that
 - **Organizations and roles.** Data belongs to an organization; members are `OWNER`, `ADMIN`, `MEMBER` or `VIEWER`, and nobody can see or touch another organization's data.
 - **An assistant** you can ask in plain language about your own batches and readings ("which batches need attention?"). It can read your data but not change it. In the demo it replays recorded answers from the real assistant; signed in, it runs live on Claude Haiku. → [docs/agent.md](docs/agent.md)
 - **Sign in with Auth0**, or **try the demo** without an account.
-- **Analytics and alerts API**: averages, trends, completeness and threshold alerts per batch. (The UI for these is not built yet.)
+- **Alerts**: when a reading is saved, plain, tested rules raise an alert if a value is outside the safe range for its crop (critical) or has been moving steadily toward a limit and would cross it within two days (warning). An Alerts page and a marker on each batch show them, and the sample data in the demo has real ones. → [docs/alerts.md](docs/alerts.md)
+- **Analytics API**: averages, trends and completeness per batch.
 
 ## How it fits together
 
@@ -103,7 +104,7 @@ erDiagram
 
 | Level | What | How |
 | --- | --- | --- |
-| **Backend** | 148 tests: token validation, first-login provisioning, tenant isolation, roles, time-of-day handling, the assistant (tools, loop, endpoint, rate limits), alert rules (thresholds by crop, trends) | pytest on an in-memory database; the model is scripted, so no API key or cost |
+| **Backend** | 165 tests: token validation, first-login provisioning, tenant isolation, roles, time-of-day handling, the assistant (tools, loop, endpoint, rate limits), alert rules (thresholds by crop, trends) | pytest on an in-memory database; the model is scripted, so no API key or cost |
 | **Frontend unit and component** | 161 tests, ~86% line coverage, enforced in CI | Vitest, Testing Library, MSW. Any API call without a mock **fails the test** |
 | **End to end** | 34 browser tests: access, dashboard, readings, batches, assistant, dark mode | Playwright against the production build |
 
@@ -200,7 +201,7 @@ Said plainly, because a reviewer will find them anyway:
 
 - **Teammates can't be invited yet.** Every user owns their own organization, so the `VIEWER`, `MEMBER` and `ADMIN` roles are enforced and tested but not yet reachable from the UI. (#71)
 - **Readings can be added but not edited or deleted** in the UI.
-- **The analytics and alerts API has no screens yet**, and there is no background alerting or sensor ingestion. (#72, #73)
+- **Alerts are only raised when a reading is saved**, so a batch that stops getting readings is not noticed, and nobody is notified outside the app yet. There is no sensor ingestion. (#72, #73)
 - **CloudFront talks to the EC2 instance over plain HTTP**, and the API port is still reachable directly. Restricting it to CloudFront is planned.
 - **Backend deploys are manual**, and there is no custom domain.
 - A real Auth0 login is covered by hand, not by the automated browser tests, which run in demo mode.

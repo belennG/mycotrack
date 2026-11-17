@@ -7,6 +7,7 @@ import type { Batch, DashboardResponse, PaginatedResponse } from '../types/batch
 import type { Tracking } from '../types/tracking'
 import type { Me } from '../types/me'
 import type { AssistantAnswer } from '../types/assistant'
+import type { Alert, AlertList } from '../types/alert'
 
 // Everything goes through the real apiClient, exactly as the app uses it in demo mode.
 beforeEach(() => {
@@ -246,5 +247,89 @@ describe('demo API: assistant', () => {
     expect(reply.recording).toBeUndefined()
     expect(reply.answer).toMatch(/only replay recorded answers/)
     expect((await get<PaginatedResponse<Batch>>('/v1/batches')).total).toBe(5)
+  })
+})
+
+describe('demo API: alerts', () => {
+  const batchNamed = async (name: string) =>
+    (await get<PaginatedResponse<Batch>>('/v1/batches?limit=10')).items.find(
+      (b) => b.batch_name === name,
+    )!
+
+  it('starts with the alerts the rules raise for the sample data', async () => {
+    const { total, items } = await get<AlertList>('/v1/alerts?is_acknowledged=false&limit=100')
+
+    const trend = items.find((a) => a.batch_name === 'Oyster-Block-01')
+    expect(trend).toMatchObject({ alert_type: 'humidity_trending_low', severity: 'warning' })
+    expect(items.filter((a) => a.batch_name === 'KingOyster-Trial-02')).toHaveLength(3)
+    expect(items.every((a) => a.severity === 'critical' || a.severity === 'warning')).toBe(true)
+    // A healthy active batch has none.
+    expect(items.some((a) => a.batch_name === 'Shiitake-Log-07')).toBe(false)
+    expect(total).toBe(items.length)
+  })
+
+  it('lists the newest first and filters by batch and by acknowledgement', async () => {
+    const king = await batchNamed('KingOyster-Trial-02')
+
+    const forKing = await get<AlertList>(`/v1/alerts?batch_id=${king.id}&limit=100`)
+    expect(forKing.items.every((a) => a.batch_id === king.id)).toBe(true)
+
+    const done = await get<AlertList>('/v1/alerts?is_acknowledged=true&limit=100')
+    expect(done.total).toBe(0)
+
+    const page = await get<AlertList>('/v1/alerts?limit=2')
+    expect(page.items).toHaveLength(2)
+    expect(page.total).toBeGreaterThan(2)
+  })
+
+  it('acknowledges an alert, which moves it to the acknowledged list', async () => {
+    const { items } = await get<AlertList>('/v1/alerts?is_acknowledged=false&limit=100')
+    const target = items[0]
+
+    const { data } = await apiClient.post<Alert>(`/v1/alerts/${target.id}/acknowledge`)
+
+    expect(data.is_acknowledged).toBe(true)
+    expect(data.acknowledged_at).not.toBeNull()
+    const done = await get<AlertList>('/v1/alerts?is_acknowledged=true&limit=100')
+    expect(done.items.map((a) => a.id)).toEqual([target.id])
+  })
+
+  it('answers 404 when acknowledging an alert that does not exist', async () => {
+    expect(await failure(apiClient.post('/v1/alerts/nope/acknowledge'))).toEqual({
+      status: 404,
+      detail: 'Alert not found',
+    })
+  })
+
+  it('raises an alert when a reading is saved out of range, once', async () => {
+    const shiitake = await batchNamed('Shiitake-Log-07')
+    const before = await get<AlertList>(`/v1/alerts?batch_id=${shiitake.id}&limit=100`)
+    expect(before.total).toBe(0)
+
+    const reading = {
+      batch_id: shiitake.id,
+      temperature: 30,
+      humidity: 85,
+      ph_level: 6,
+      moisture: 60,
+    }
+    await apiClient.post('/v1/trackings', reading)
+    await apiClient.post('/v1/trackings', reading)
+
+    const after = await get<AlertList>(`/v1/alerts?batch_id=${shiitake.id}&limit=100`)
+    expect(after.items.map((a) => a.alert_type)).toEqual(['temperature_out_of_range'])
+  })
+
+  it('keeps alerts across a reload, and works out alerts for a session saved without them', async () => {
+    await get('/v1/batches') // the store exists
+    const saved = JSON.parse(sessionStorage.getItem('mycotrack-demo-db')!)
+    delete saved.alerts
+    // A reload: the in-memory copy is dropped, and what was saved earlier has no alerts.
+    resetDemoDb()
+    sessionStorage.setItem('mycotrack-demo-db', JSON.stringify(saved))
+
+    const { total } = await get<AlertList>('/v1/alerts?limit=100')
+
+    expect(total).toBeGreaterThan(0)
   })
 })

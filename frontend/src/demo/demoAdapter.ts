@@ -7,6 +7,7 @@ import {
 import type { Batch, BatchStatus, DashboardBatch, DashboardResponse } from '../types/batch'
 import type { Tracking } from '../types/tracking'
 import { replayAssistant } from './assistantReplay'
+import { raiseAlerts, seedAlerts } from './demoAlerts'
 import { createSeed, type DemoDb } from './demoData'
 
 /**
@@ -33,12 +34,15 @@ function load(): DemoDb {
     const raw = sessionStorage.getItem(STORAGE_KEY)
     if (raw) {
       db = JSON.parse(raw) as DemoDb
+      // A session saved before alerts existed has none: work them out from its readings.
+      db.alerts ??= seedAlerts(db.batches, db.trackings)
       return db
     }
   } catch {
     // fall through to a fresh seed
   }
-  db = createSeed()
+  const seed = createSeed()
+  db = { ...seed, alerts: seedAlerts(seed.batches, seed.trackings) }
   persist()
   return db
 }
@@ -115,6 +119,34 @@ function route(config: InternalAxiosRequestConfig): AxiosResponse {
   if (path === '/v1/assistant/ask' && method === 'post') {
     const { question } = body<{ question?: string }>(config)
     return respond(config, 200, replayAssistant(question ?? ''))
+  }
+
+  // ---- alerts -------------------------------------------------------------
+  if (path === '/v1/alerts' && method === 'get') {
+    const batchId = params.get('batch_id')
+    const acknowledged = params.get('is_acknowledged')
+    const skip = Number(params.get('skip') ?? 0)
+    const limit = Math.min(Number(params.get('limit') ?? 10), 100)
+    const filtered = store.alerts
+      .filter((a) => !batchId || a.batch_id === batchId)
+      .filter((a) => acknowledged === null || a.is_acknowledged === (acknowledged === 'true'))
+      .sort((a, b) => b.created_at.localeCompare(a.created_at))
+    return respond(config, 200, {
+      total: filtered.length,
+      items: filtered.slice(skip, skip + limit),
+    })
+  }
+
+  const acknowledgeMatch = path.match(/^\/v1\/alerts\/([^/]+)\/acknowledge$/)
+  if (acknowledgeMatch && method === 'post') {
+    const alert = store.alerts.find((a) => a.id === acknowledgeMatch[1])
+    if (!alert) fail(config, 404, 'Alert not found')
+    if (!alert.is_acknowledged) {
+      alert.is_acknowledged = true
+      alert.acknowledged_at = new Date().toISOString()
+      persist()
+    }
+    return respond(config, 200, alert)
   }
 
   // ---- batches ----------------------------------------------------------
@@ -220,6 +252,7 @@ function route(config: InternalAxiosRequestConfig): AxiosResponse {
     }
     store.trackings.push(created)
     batch.updated_at = now
+    raiseAlerts(store, batch, now)
     persist()
     return respond(config, 201, created)
   }

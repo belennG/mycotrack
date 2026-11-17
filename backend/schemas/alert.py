@@ -9,6 +9,7 @@ class AlertResponse(BaseModel):
 
     id: UUID
     batch_id: UUID
+    batch_name: str
     alert_type: str
     severity: str
     message: str

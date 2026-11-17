@@ -1,5 +1,5 @@
-from fastapi import APIRouter, Depends, HTTPException, status
-from sqlalchemy.orm import Session
+from fastapi import APIRouter, Depends, HTTPException, Query, status
+from sqlalchemy.orm import Session, contains_eager
 from typing import Optional, List
 from datetime import datetime, timezone
 from uuid import UUID
@@ -22,6 +22,7 @@ def _org_alerts(db: Session, ctx: OrgContext):
     return (
         db.query(Alert)
         .join(Batch, Alert.batch_id == Batch.id)
+        .options(contains_eager(Alert.batch))  # batch_name comes with the row
         .filter(Batch.organization_id == ctx.organization.id)
     )
 
@@ -30,8 +31,9 @@ def _org_alerts(db: Session, ctx: OrgContext):
 def list_alerts(
     batch_id: Optional[UUID] = None,
     alert_type: Optional[str] = None,
+    is_acknowledged: Optional[bool] = None,
     skip: int = 0,
-    limit: int = 10,
+    limit: int = Query(10, ge=1, le=100),
     ctx: OrgContext = Depends(read_access),
     db: Session = Depends(get_db),
 ):
@@ -42,6 +44,8 @@ def list_alerts(
         query = query.filter(Alert.batch_id == batch_id)
     if alert_type:
         query = query.filter(Alert.alert_type == alert_type)
+    if is_acknowledged is not None:
+        query = query.filter(Alert.is_acknowledged.is_(is_acknowledged))
 
     total = query.count()
     alerts = query.order_by(Alert.created_at.desc()).offset(skip).limit(limit).all()

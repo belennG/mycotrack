@@ -129,6 +129,28 @@ def test_batch_summary_has_metrics_and_flags_out_of_range_readings(world):
     assert data["health"] == "Needs attention"
     assert any("Temperature" in issue for issue in data["current_issues"])
     assert "oyster" in data["thresholds_note"]
+    assert data["thresholds_used"]["temperature"] == {"min": 20.0, "max": 25.0}
+
+
+def test_batch_summary_judges_each_batch_by_its_own_crop(world):
+    shiitake = world.make.batch(world.ctx.organization, "Shiitake-01")
+    shiitake.crop_type = "Shiitake"
+    reishi = world.make.batch(world.ctx.organization, "Reishi-01")
+    reishi.crop_type = "Reishi"
+    world.make.db.commit()
+    world.make.tracking(shiitake)  # a summary has ranges only once there is a reading
+    world.make.tracking(reishi)
+
+    on_shiitake = json.loads(
+        call(world, "get_batch_summary", {"batch_id": str(shiitake.id)}).content
+    )
+    on_reishi = json.loads(
+        call(world, "get_batch_summary", {"batch_id": str(reishi.id)}).content
+    )
+
+    assert on_shiitake["thresholds_used"]["temperature"] == {"min": 12.0, "max": 18.0}
+    assert "shiitake" in on_shiitake["thresholds_note"]
+    assert "default" in on_reishi["thresholds_note"]
 
 
 def test_batch_summary_without_readings_says_so(world):
