@@ -1,0 +1,75 @@
+name: Agent evals
+
+# Runs the assistant against the real model on a fixed set of questions (see docs/evals.md).
+# It costs a couple of cents per run, so it does not run on every pull request: only on the
+# ones that touch the assistant, once a week (a model can change under us), and by hand.
+#
+# Needs a repository secret ANTHROPIC_API_KEY. Without it the job says so and passes, so
+# adding this workflow breaks nothing. Use a key with a small spend limit for it.
+on:
+  pull_request:
+    paths:
+      - "backend/agent/**"
+      - "backend/evals/**"
+      - "backend/services/alerts.py"
+      - "backend/services/thresholds.py"
+      - ".github/workflows/agent-evals.yml"
+  schedule:
+    - cron: "0 7 * * 2" # Tuesdays, 07:00 UTC
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  evals:
+    # Pull requests from forks get no secrets, so there is nothing to run for them.
+    if: github.event_name != 'pull_request' || github.event.pull_request.head.repo.full_name == github.repository
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    defaults:
+      run:
+        working-directory: backend
+
+    steps:
+      - name: Checkout Code
+        uses: actions/checkout@v7
+
+      - name: Is there an API key?
+        id: key
+        env:
+          ANTHROPIC_API_KEY: ${{ secrets.ANTHROPIC_API_KEY }}
+        run: |
+          if [ -z "$ANTHROPIC_API_KEY" ]; then
+            echo "::notice::No ANTHROPIC_API_KEY secret: the evals were skipped."
+            echo "run=false" >> "$GITHUB_OUTPUT"
+          else
+            echo "run=true" >> "$GITHUB_OUTPUT"
+          fi
+
+      - name: Set up Python
+        if: steps.key.outputs.run == 'true'
+        uses: actions/setup-python@v7
+        with:
+          python-version: "3.13"
+          cache: pip
+          cache-dependency-path: backend/requirements.txt
+
+      - name: Install dependencies
+        if: steps.key.outputs.run == 'true'
+        run: pip install -r requirements.txt
+
+      - name: Run the evals
+        if: steps.key.outputs.run == 'true'
+        env:
+          ANTHROPIC_API_KEY: ${{ secrets.ANTHROPIC_API_KEY }}
+        run: python -m evals --json "$RUNNER_TEMP/eval-results.json" | tee "$RUNNER_TEMP/eval-report.txt"
+
+      - name: Keep the results
+        if: always() && steps.key.outputs.run == 'true'
+        uses: actions/upload-artifact@v7
+        with:
+          name: eval-results
+          path: |
+            ${{ runner.temp }}/eval-results.json
+            ${{ runner.temp }}/eval-report.txt

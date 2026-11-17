@@ -101,6 +101,11 @@ that uses two tools costs roughly a tenth of a cent. The real exposure is abuse 
 endpoint, so the plan is: the live demo replays recorded answers (no API calls), real usage requires
 a signed-in account, with per-user rate limits and a spend cap set in the Anthropic console.
 
+## Evaluating it
+
+The assistant is checked against the real model on a fixed set of questions, including
+safety ones (injection, leaking, other tenants, writing): see [evals.md](evals.md).
+
 ## Not yet / next
 
 1. Writing readings from natural language, with explicit confirmation.
