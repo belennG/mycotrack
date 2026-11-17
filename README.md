@@ -105,8 +105,9 @@ erDiagram
 | Level | What | How |
 | --- | --- | --- |
 | **Backend** | 202 tests: token validation, first-login provisioning, tenant isolation, roles, time-of-day handling, the assistant (tools, loop, endpoint, rate limits), alert rules (thresholds by crop, trends), the evals' own graders | pytest on an in-memory database; the model is scripted, so no API key or cost |
-| **Frontend unit and component** | 161 tests, ~86% line coverage, enforced in CI | Vitest, Testing Library, MSW. Any API call without a mock **fails the test** |
-| **End to end** | 34 browser tests: access, dashboard, readings, batches, assistant, dark mode | Playwright against the production build |
+| **Frontend unit and component** | 203 tests, ~89% line coverage, enforced in CI | Vitest, Testing Library, MSW. Any API call without a mock **fails the test** |
+| **End to end** | 41 browser tests: access, dashboard, readings, batches, alerts, assistant, dark mode | Playwright against the production build |
+| **Agent evals** | 15 questions asked of the real model, 3 runs each, graded by code. Safety cases (injected note, leaked prompt, another tenant, claimed writes) must pass every run | `python -m evals`; weekly and on assistant changes in CI. → [docs/evals.md](docs/evals.md) |
 
 The tests were written to be able to fail: key behaviors were deliberately broken to confirm the right tests caught them, the unit tests pass on Node 22 and 25 and in three timezones, and they found real bugs, which are fixed. → [frontend/docs/testing.md](frontend/docs/testing.md)
 
