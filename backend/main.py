@@ -3,7 +3,7 @@ import sentry_sdk
 import os
 from fastapi import FastAPI
 from middleware.cors import setup_cors
-from routers import analytics, alerts, batches, trackings, users
+from routers import analytics, alerts, assistant, batches, trackings, users
 
 load_dotenv()
 
@@ -33,6 +33,7 @@ app.include_router(trackings.router)
 app.include_router(analytics.router)
 app.include_router(alerts.router)
 app.include_router(batches.router)
+app.include_router(assistant.router)
 
 
 # Health check endpoint

@@ -6,6 +6,7 @@ import { enterDemoMode } from './demoMode'
 import type { Batch, DashboardResponse, PaginatedResponse } from '../types/batch'
 import type { Tracking } from '../types/tracking'
 import type { Me } from '../types/me'
+import type { AssistantAnswer } from '../types/assistant'
 
 // Everything goes through the real apiClient, exactly as the app uses it in demo mode.
 beforeEach(() => {
@@ -223,5 +224,27 @@ describe('demo API: session', () => {
 
   it('answers 404 for a route it has no mock for', async () => {
     expect((await failure(apiClient.get('/v1/unknown'))).status).toBe(404)
+  })
+})
+
+describe('demo API: assistant', () => {
+  const ask = async (question: string) =>
+    (await apiClient.post<AssistantAnswer>('/v1/assistant/ask', { question, history: [] })).data
+
+  it('replays a recording for a suggested question, without touching the data', async () => {
+    const before = await get<PaginatedResponse<Batch>>('/v1/batches')
+    const reply = await ask('Which of my batches need attention?')
+
+    expect(reply.recording?.model).toMatch(/^claude-/)
+    expect(reply.tool_calls.length).toBeGreaterThan(0)
+    expect(await get<PaginatedResponse<Batch>>('/v1/batches')).toEqual(before)
+  })
+
+  it('does not invent an answer for a question it has no recording for', async () => {
+    const reply = await ask('Delete all my batches')
+
+    expect(reply.recording).toBeUndefined()
+    expect(reply.answer).toMatch(/only replay recorded answers/)
+    expect((await get<PaginatedResponse<Batch>>('/v1/batches')).total).toBe(5)
   })
 })

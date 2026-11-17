@@ -1,0 +1,60 @@
+name: Security audit
+
+# The audit in the pull-request pipelines only runs when someone opens a pull request, so a
+# vulnerability published tomorrow would stay unnoticed until it blocks an unrelated change.
+# This runs it once a week regardless, and opens (or updates) one issue when it finds something.
+# Run it by hand from the Actions tab with "Run workflow".
+on:
+  schedule:
+    - cron: "0 6 * * 1" # Mondays, 06:00 UTC
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  issues: write
+
+jobs:
+  audit:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    defaults:
+      run:
+        shell: bash
+
+    steps:
+      - name: Checkout Code
+        uses: actions/checkout@v7
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v7
+        with:
+          node-version: "22"
+
+      # Same gate as the frontend pipeline. It reads package-lock.json, so nothing is installed.
+      - name: Audit the frontend (npm audit)
+        id: npm
+        continue-on-error: true
+        working-directory: frontend
+        run: npm audit --audit-level=high 2>&1 | tee "$GITHUB_WORKSPACE/npm-audit.txt"
+
+      - name: Set up Python
+        uses: actions/setup-python@v7
+        with:
+          python-version: "3.13"
+
+      # Both requirements files are fully pinned lock files, so no dependency resolution is needed.
+      # The development file includes the runtime packages, so auditing it covers both.
+      - name: Audit the backend (pip-audit)
+        id: pip
+        continue-on-error: true
+        run: |
+          pip install --quiet pip-audit==2.10.1
+          pip-audit -r backend/requirements-dev.txt --no-deps --disable-pip 2>&1 | tee pip-audit.txt
+
+      - name: Open, update or close the issue
+        env:
+          GH_TOKEN: ${{ github.token }}
+          NPM_OUTCOME: ${{ steps.npm.outcome }}
+          PIP_OUTCOME: ${{ steps.pip.outcome }}
+          RUN_URL: ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}
+        run: bash .github/scripts/report-audit.sh

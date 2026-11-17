@@ -30,6 +30,22 @@ describe('Header: theme', () => {
   })
 })
 
+describe('Header: navigation', () => {
+  // The menu is hidden below the medium breakpoint (jsdom applies no media queries), hence `hidden`.
+  it('links to the dashboard and the assistant', () => {
+    renderWithProviders(<Header />)
+
+    expect(screen.getByRole('link', { name: 'Dashboard', hidden: true })).toHaveAttribute(
+      'href',
+      '/dashboard',
+    )
+    expect(screen.getByRole('link', { name: 'Assistant', hidden: true })).toHaveAttribute(
+      'href',
+      '/assistant',
+    )
+  })
+})
+
 describe('Header: session', () => {
   it('shows the user and their organization with role', async () => {
     renderWithProviders(<Header />)

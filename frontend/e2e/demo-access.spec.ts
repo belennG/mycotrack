@@ -28,6 +28,30 @@ test.describe('getting in without an account', () => {
     await expect(page.getByTestId('organization')).toHaveText('Demo Farm · Owner')
   })
 
+  test('/demo opens straight into the demo, with no login screen in between', async ({ page }) => {
+    await page.goto('/demo')
+
+    await expect(page).toHaveURL(/\/dashboard$/)
+    await expect(page.getByRole('status')).toContainText('Demo mode')
+    await expect(page.getByText('Oyster-Block-01')).toBeVisible()
+  })
+
+  test('/demo always starts from fresh sample data', async ({ page }) => {
+    await page.goto('/demo')
+    await page.getByRole('button', { name: '+ Create New Batch' }).click()
+    await page.getByPlaceholder('e.g., Golden Teacher Batch #1').fill('Left-Over')
+    await page.getByPlaceholder('e.g., Psilocybe cubensis').fill('Enoki')
+    await page.locator('input[name="expected_harvest_date"]').fill('2030-01-01')
+    await page.getByPlaceholder('e.g., Greenhouse Room A').fill('Shelf')
+    await page.getByRole('button', { name: 'Save Entry' }).click()
+    await expect(page).toHaveURL(/\/trackings$/)
+
+    await page.goto('/demo')
+
+    await expect(page.getByText('Oyster-Block-01')).toBeVisible()
+    await expect(page.getByText('Left-Over')).toHaveCount(0)
+  })
+
   test('the demo survives a reload', async ({ page }) => {
     await startDemo(page)
 
