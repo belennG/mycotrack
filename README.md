@@ -24,6 +24,7 @@ Click **Try the demo**: no account needed. It runs on sample data that lives onl
 - **Batches** move through a lifecycle (active, completed, failed, archived) and are laid out on a board by status, each card showing its latest reading.
 - **Readings** record temperature, humidity, pH and moisture with a **date and time**, are validated against physical ranges, and are paged through ten at a time.
 - **Organizations and roles.** Data belongs to an organization; members are `OWNER`, `ADMIN`, `MEMBER` or `VIEWER`, and nobody can see or touch another organization's data.
+- **An assistant** you can ask in plain language about your own batches and readings ("which batches need attention?"). It can read your data but not change it. In the demo it replays recorded answers from the real assistant; signed in, it runs live on Claude Haiku. → [docs/agent.md](docs/agent.md)
 - **Sign in with Auth0**, or **try the demo** without an account.
 - **Analytics and alerts API**: averages, trends, completeness and threshold alerts per batch. (The UI for these is not built yet.)
 
@@ -94,6 +95,7 @@ erDiagram
 - **Auth0 handles identity only.** Authorization and tenancy live in the application's own database, so the identity provider stays replaceable. First login creates the user and their organization in one transaction, and eight simultaneous first logins against real PostgreSQL produced exactly one of each.
 - **A demo that is the real app.** Demo mode swaps the Axios adapter for an in-browser mock of the API, so every screen, hook and form runs for real with no backend or account. It is also what the end-to-end tests run against, which makes them fast and deterministic.
 - **One origin, no CORS.** CloudFront serves the SPA from a private bucket and forwards `/api/*` to the API. The single-page-app fallback is a small CloudFront Function on the website behavior only, because a distribution-wide error page would also rewrite genuine 404s from the API. → [infra/README.md](infra/README.md)
+- **An agent built from scratch, and contained.** The assistant is a hand-written tool-use loop on the Anthropic SDK, no framework. Safety comes from the design, not from asking the model nicely: its tools are read-only and bound to the caller's organization (the model cannot even name another one), user-written notes are treated as data, and a user-and-global rate limit caps the bill. The tests play a *compromised* model that obeys an injected instruction and check it still cannot leak or write. → [docs/agent.md](docs/agent.md)
 - **Keyless deploys.** GitHub Actions assumes an AWS role through OIDC. The role can be assumed only from this repository's `main` branch and can only touch the one bucket.
 - **CI catches drift.** `alembic check` fails the build if the models and the migrations disagree. It was added after finding a column that was `DATE` in the database but a date-and-time everywhere else, which had been silently discarding the time of every reading.
 
@@ -101,9 +103,9 @@ erDiagram
 
 | Level | What | How |
 | --- | --- | --- |
-| **Backend** | 45 tests: token validation, first-login provisioning, tenant isolation, roles, time-of-day handling | pytest on an in-memory database |
-| **Frontend unit and component** | 119 tests, ~83% line coverage, enforced in CI | Vitest, Testing Library, MSW. Any API call without a mock **fails the test** |
-| **End to end** | 29 browser tests: access, dashboard, readings, batches, dark mode | Playwright against the production build |
+| **Backend** | 113 tests: token validation, first-login provisioning, tenant isolation, roles, time-of-day handling, the assistant (tools, loop, endpoint, rate limits) | pytest on an in-memory database; the model is scripted, so no API key or cost |
+| **Frontend unit and component** | 161 tests, ~86% line coverage, enforced in CI | Vitest, Testing Library, MSW. Any API call without a mock **fails the test** |
+| **End to end** | 34 browser tests: access, dashboard, readings, batches, assistant, dark mode | Playwright against the production build |
 
 The tests were written to be able to fail: key behaviors were deliberately broken to confirm the right tests caught them, the unit tests pass on Node 22 and 25 and in three timezones, and they found real bugs, which are fixed. → [frontend/docs/testing.md](frontend/docs/testing.md)
 

@@ -82,6 +82,12 @@ export default function Header() {
           Dashboard
         </NavLink>
         <NavLink
+          to="/assistant"
+          style={({ isActive }) => ({ fontWeight: isActive ? 'bold' : 'normal' })}
+        >
+          Assistant
+        </NavLink>
+        <NavLink
           to="/settings"
           style={({ isActive }) => ({ fontWeight: isActive ? 'bold' : 'normal' })}
         >
