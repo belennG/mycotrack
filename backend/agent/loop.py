@@ -67,9 +67,15 @@ def run_agent(
     db: Session,
     client: MessagesClient,
     *,
+    history: list[dict] | None = None,
     model: str = DEFAULT_MODEL,
     max_turns: int = MAX_TURNS,
 ) -> AgentResult:
+    """Answer *question*. *history* is earlier question/answer text from the conversation.
+
+    History is untrusted input like everything else: the caller sends it, so it is only
+    ever plain text turns, and the tools stay bound to the tenant whatever it says.
+    """
     question = question.strip()
     if not question:
         raise AgentInputError("The question is empty.")
@@ -79,7 +85,7 @@ def run_agent(
         )
 
     tools = tool_schemas()
-    messages: list[dict] = [{"role": "user", "content": question}]
+    messages: list[dict] = [*(history or []), {"role": "user", "content": question}]
     result = AgentResult(answer="", completed=False, turns=0)
 
     for _ in range(max_turns):

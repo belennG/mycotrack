@@ -6,8 +6,9 @@ A small agent that answers questions about a grower's own batches and readings
 It is built **from scratch** on the Anthropic Python SDK: no agent framework, so every step is visible.
 The code is in [`backend/agent/`](../backend/agent).
 
-> **Status:** the core (tools, loop, safeguards, tests) is done. It is not yet exposed through an
-> API endpoint or the UI, and it has not yet been run against the real model.
+> **Status:** the core (tools, loop, safeguards, tests) and the API endpoint are done, and the
+> agent has been run against the real model (`backend/scripts/try_agent.py`). The chat panel and
+> the demo-mode replay are next.
 
 ## Is it really an agent?
 
@@ -57,6 +58,25 @@ safeguard on purpose and watching the right test fail.
 - **Tools never crash the loop.** Every failure becomes an error the model can read; internal details
   are logged, never shown.
 
+## The endpoint
+
+`POST /api/v1/assistant/ask` with `{"question": "...", "history": [...]}` returns the answer, the
+names of the tools used, and the token counts ([`routers/assistant.py`](../backend/routers/assistant.py)).
+
+- **Who:** any signed-in member of the organization, including viewers (the assistant only reads).
+  Acting for an organization you do not belong to is a 404, like every other route.
+- **Conversation:** the server keeps no state. The client sends back up to 6 earlier messages
+  (at most 2000 characters each, strictly alternating user/assistant). History is untrusted input
+  like everything else: it is plain text turns, and the tools stay bound to the tenant whatever it says.
+- **Limits:** 20 questions per user per hour and 500 per day across everyone (both configurable with
+  `ASSISTANT_USER_LIMIT_PER_HOUR` and `ASSISTANT_GLOBAL_LIMIT_PER_DAY`). Sign-up is open, so the global
+  ceiling is what caps the bill. The limiter is in memory, so it is per process and resets on restart:
+  fine for one small server, to be replaced (for example with Redis) before running several.
+- **Failures never explain themselves to the caller:** no key configured or a rejected key is
+  a 503 "not available"; any other API failure is a 502; the cause goes to the log.
+- **One thing to know:** the request holds a database session while the model answers, which can take
+  seconds. Fine at this scale; it would need rethinking under real load.
+
 ## Cost
 
 The model is Claude Haiku 5.5. Every turn of the loop re-sends the whole conversation, so a question
@@ -66,8 +86,7 @@ a signed-in account, with per-user rate limits and a spend cap set in the Anthro
 
 ## Not yet / next
 
-1. A first run against the real API, measuring tokens and cost.
-2. The `/api/v1/assistant` endpoint and a chat panel; recorded answers in demo mode.
-3. Writing readings from natural language, with explicit confirmation.
-4. Alerts: deterministic threshold and trend rules that create alerts (the `alerts` table is never
+1. The chat panel; in demo mode, replay answers recorded from real runs (no API calls), labelled as such.
+2. Writing readings from natural language, with explicit confirmation.
+3. Alerts: deterministic threshold and trend rules that create alerts (the `alerts` table is never
    written today); the agent would only *explain* an alert that already fired, and the code sends it.
