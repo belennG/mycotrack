@@ -36,6 +36,34 @@ updates:
       actions:
         patterns: ["*"]
 
+  # Base images of the Dockerfiles (python, node, nginx), so security patches reach the images
+  # too. Moving to a new Python minor (3.13 to 3.14) is a deliberate move, since requirements.txt
+  # is compiled with 3.13 and CI tests 3.13, so for the backend only patch updates are grouped
+  # and anything bigger arrives as its own pull request.
+  - package-ecosystem: docker
+    directory: /backend
+    schedule:
+      interval: weekly
+      day: monday
+    groups:
+      patch:
+        update-types: [patch]
+
+  - package-ecosystem: docker
+    directory: /frontend
+    schedule:
+      interval: weekly
+      day: monday
+    groups:
+      minor-and-patch:
+        update-types: [minor, patch]
+
+  - package-ecosystem: docker-compose
+    directory: /
+    schedule:
+      interval: weekly
+      day: monday
+
   - package-ecosystem: terraform
     directory: /infra
     schedule:
