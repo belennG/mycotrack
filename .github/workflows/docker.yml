@@ -1,0 +1,83 @@
+name: Docker
+
+# Builds both images and starts the whole stack with `docker compose`, so the "With Docker"
+# instructions in the README cannot break without anyone noticing. It runs only when something
+# that goes into an image changes. No secrets: the stack starts in its zero-configuration form
+# (demo-only web app, API without Auth0), the same one a visitor gets from a fresh clone.
+on:
+  pull_request:
+    branches: [main, develop]
+    paths:
+      - "backend/Dockerfile"
+      - "backend/.dockerignore"
+      - "backend/requirements.txt"
+      - "frontend/Dockerfile"
+      - "frontend/.dockerignore"
+      - "frontend/nginx.conf"
+      - "frontend/package.json"
+      - "frontend/package-lock.json"
+      - "docker-compose.yml"
+      - ".github/workflows/docker.yml"
+  push:
+    branches: [main, develop]
+    paths:
+      - "backend/Dockerfile"
+      - "backend/.dockerignore"
+      - "backend/requirements.txt"
+      - "frontend/Dockerfile"
+      - "frontend/.dockerignore"
+      - "frontend/nginx.conf"
+      - "frontend/package.json"
+      - "frontend/package-lock.json"
+      - "docker-compose.yml"
+      - ".github/workflows/docker.yml"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: docker-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  compose-smoke-test:
+    name: Build the images and start the stack
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - name: Check out the code
+        uses: actions/checkout@v7
+
+      - name: Build the images and start the stack
+        run: docker compose up --build --detach
+
+      - name: Wait for the API, then check every service
+        run: |
+          # Give the API up to three minutes to come up (it starts after the migration).
+          for i in $(seq 1 60); do
+            code=$(curl -s -o /dev/null -w "%{http_code}" http://localhost:8000/health || true)
+            [ "$code" = "200" ] && break
+            sleep 3
+          done
+          check() {  # check <name> <expected status> <url>
+            actual=$(curl -s -o /dev/null -w "%{http_code}" "$3" || true)
+            echo "$1: expected $2, got $actual"
+            [ "$actual" = "$2" ]
+          }
+          # The one-off migration must have finished, and succeeded.
+          exit_code=$(docker compose ps --all --format '{{.Service}} {{.ExitCode}}' | awk '$1=="migrate" {print $2}')
+          echo "migrate: expected exit code 0, got $exit_code"
+          [ "$exit_code" = "0" ]
+          check "api /health" 200 http://localhost:8000/health
+          check "api is protected" 401 http://localhost:8000/api/v1/batches
+          check "web /" 200 http://localhost:5173/
+          check "web /demo (client-side route)" 200 http://localhost:5173/demo
+
+      - name: Show the logs if something failed
+        if: failure()
+        run: docker compose ps --all && docker compose logs --no-color
+
+      - name: Stop the stack
+        if: always()
+        run: docker compose down --volumes
