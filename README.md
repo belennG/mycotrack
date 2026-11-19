@@ -117,6 +117,23 @@ Between pull requests, a **weekly scheduled audit** (`npm audit` of everything, 
 
 ## Run it locally
 
+### With Docker (nothing to install but Docker)
+
+```bash
+git clone https://github.com/belennG/mycotrack.git && cd mycotrack
+docker compose up --build
+```
+
+Then open <http://localhost:5173/demo>. That starts PostgreSQL, applies the migrations, and runs the API (<http://localhost:8000/docs>) and the web app. The demo needs no account and no keys: it uses sample data and recorded assistant answers.
+
+To use the real app (login, your own data, the live assistant) you need your own Auth0 tenant ([docs/auth0.md](docs/auth0.md)) and an Anthropic key:
+
+- `cp backend/.env.example backend/.env` and fill in the `AUTH0_*` values and `ANTHROPIC_API_KEY`.
+- Create a `.env` file next to `docker-compose.yml` with `VITE_AUTH0_DOMAIN`, `VITE_AUTH0_CLIENT_ID` and `VITE_AUTH0_AUDIENCE` (the web app bakes these in when it is built).
+- `docker compose up --build` again. Allow `http://localhost:5173/callback` as a callback URL in Auth0.
+
+Only the demo, without the repository: `docker build -t mycotrack-web frontend && docker run -p 8080:8080 mycotrack-web`, then <http://localhost:8080/demo>. Both images run as a non-root user and contain no secrets.
+
 ### The frontend, with the demo (no backend, no account)
 
 ```bash

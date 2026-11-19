@@ -1,0 +1,14 @@
+# Keep the build context small, and keep a developer's local settings out of the image:
+# Vite reads .env at build time, which would bake real Auth0/Sentry values into the files.
+.env
+.env.*
+!.env.example
+node_modules/
+dist/
+coverage/
+playwright-report/
+test-results/
+e2e/
+.DS_Store
+Dockerfile
+.dockerignore

@@ -1,0 +1,19 @@
+# Keep the build context small and keep secrets and data out of it. The Dockerfile also copies
+# only the runtime folders by name; this is the second lock on the same door.
+.env
+.env.*
+!.env.example
+venv/
+.venv/
+__pycache__/
+*.py[cod]
+.pytest_cache/
+.mypy_cache/
+.DS_Store
+*.dump
+tests/
+evals/
+scripts/
+requirements-dev.*
+Dockerfile
+.dockerignore

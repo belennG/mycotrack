@@ -1,10 +1,22 @@
+# MycoTrack, whole stack in containers.
+#
+#   docker compose up --build            database + migrations + API + web app
+#   docker compose up -d db              only the database (for running the API/frontend from source)
+#
+# With no configuration at all this already works for the demo:  http://localhost:5173/demo
+# A real login needs your own Auth0 tenant (docs/auth0.md): put the backend values in
+# backend/.env (see backend/.env.example) and the three VITE_AUTH0_* values below in a `.env`
+# file next to this one. The web app bakes them in at build time, so re-run with --build.
+# The assistant also needs ANTHROPIC_API_KEY in backend/.env.
+
 services:
   db:
     image: postgres:15
     container_name: mycotrack_db
     restart: unless-stopped
     env_file:
-      - ./backend/.env
+      - path: ./backend/.env
+        required: false
     environment:
       POSTGRES_USER: ${DB_USER:-postgres}
       POSTGRES_PASSWORD: ${DB_PASSWORD:-postgres}
@@ -13,6 +25,64 @@ services:
       - "5432:5432"
     volumes:
       - postgres_data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U $${POSTGRES_USER} -d $${POSTGRES_DB}"]
+      interval: 5s
+      timeout: 5s
+      retries: 10
+
+  # One-off job: brings the schema up to date, then exits. Kept separate from `api` so that
+  # starting several API containers never runs migrations twice at once.
+  migrate:
+    build: ./backend
+    image: mycotrack-api
+    command: ["alembic", "upgrade", "head"]
+    env_file:
+      - path: ./backend/.env
+        required: false
+    environment: &db-env
+      # Inside the compose network the database is "db", whatever backend/.env says
+      # (it is written for running the API on the host). An empty DATABASE_URL makes the
+      # app fall back to the DB_* values below.
+      DATABASE_URL: ""
+      DB_HOST: db
+      DB_PORT: "5432"
+      DB_USER: ${DB_USER:-postgres}
+      DB_PASSWORD: ${DB_PASSWORD:-postgres}
+      DB_NAME: ${DB_NAME:-mycotrack}
+    depends_on:
+      db:
+        condition: service_healthy
+    restart: "no"
+
+  api:
+    build: ./backend
+    image: mycotrack-api
+    restart: unless-stopped
+    env_file:
+      - path: ./backend/.env
+        required: false
+    environment: *db-env
+    depends_on:
+      migrate:
+        condition: service_completed_successfully
+    ports:
+      - "8000:8000"
+
+  # The built web app behind nginx. Published on 5173 (not 8080) on purpose: the API's CORS
+  # settings allow the origin http://localhost:5173, the same one `npm run dev` uses.
+  web:
+    build:
+      context: ./frontend
+      args:
+        VITE_API_BASE_URL: ${VITE_API_BASE_URL:-http://localhost:8000/api}
+        VITE_AUTH0_DOMAIN: ${VITE_AUTH0_DOMAIN:-}
+        VITE_AUTH0_CLIENT_ID: ${VITE_AUTH0_CLIENT_ID:-}
+        VITE_AUTH0_AUDIENCE: ${VITE_AUTH0_AUDIENCE:-}
+    image: mycotrack-web
+    restart: unless-stopped
+    ports:
+      - "5173:8080"
 
 volumes:
   postgres_data:
